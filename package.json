@@ -1,0 +1,11 @@
+{
+  "name": "devlog-api-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/skygl/Devlog.git",
+  "author": "skygl <jupiter9501@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
