@@ -1,12 +1,21 @@
 {
   "name": "devlog-api-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/app.js",
   "repository": "https://github.com/skygl/Devlog.git",
   "author": "skygl <jupiter9501@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "babel-node ./src/app.js"
+  },
   "dependencies": {
     "express": "^4.17.1",
     "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
+    "@babel/preset-env": "^7.9.5"
   }
 }
