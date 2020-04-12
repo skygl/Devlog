@@ -40,7 +40,7 @@ const parseHTML = (html) => {
         table: 0
     };
 
-    $("div > div, article > div").remove();
+    $("div > div, article > div, p > code").remove();
 
     $("h1, h2, h3, p, img, code, ul, ol, li, blockquote, a, table").each((index, element) => {
         result[element.name]++;
