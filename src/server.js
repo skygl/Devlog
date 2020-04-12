@@ -1,6 +1,7 @@
 import express from 'express';
 
 import blog from './api/blog/index';
+import dom from './api/dom/index';
 
 export default class Server {
 
@@ -13,6 +14,7 @@ export default class Server {
         const app = this.app;
         app.use(express.json());
         app.use('/blogs', blog);
+        app.use('/doms', dom);
     }
 
     listen(port) {
