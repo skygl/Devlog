@@ -12,7 +12,9 @@ export default class Server {
 
     route() {
         const app = this.app;
-        app.use(express.json());
+        app.use(express.json({
+            limit: "50mb"
+        }));
         app.use('/blogs', blog);
         app.use('/doms', dom);
     }
