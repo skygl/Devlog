@@ -11,6 +11,9 @@ const saveBlog = (blogInfo) => {
                 } else {
                     let blog = new Blog();
                     blog.url = blogInfo.url;
+                    blog.feed = blogInfo.feed;
+                    blog.post_regex = blogInfo.post_regex;
+                    blog.elements = blogInfo.elements;
                     blog.created_at = Date.now();
                     blog.updated_at = Date.now();
                     blog.posts = [];
