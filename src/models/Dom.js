@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const DomSchema = new mongoose.Schema({
+    url: String,
     h1: {type: Number, default: 0},
     h2: {type: Number, default: 0},
     h3: {type: Number, default: 0},
