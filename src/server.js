@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 import blog from './api/blog/index';
 import dom from './api/dom/index';
@@ -12,6 +13,7 @@ export default class Server {
 
     route() {
         const app = this.app;
+        app.use(cors());
         app.use(express.json({
             limit: "50mb"
         }));
