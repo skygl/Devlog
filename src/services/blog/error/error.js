@@ -1,5 +1,6 @@
-import DuplicatedUrlExistsError from "./DuplicatedUrlExistsError";
+import DuplicatedBlogUrlExistsError from "./DuplicatedBlogUrlExistsError";
+import NotExistsHandleableBlogError from "./NotExistsHandleableBlogError";
 
 export {
-    DuplicatedUrlExistsError
+    DuplicatedBlogUrlExistsError, NotExistsHandleableBlogError
 }

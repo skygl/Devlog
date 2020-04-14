@@ -3,6 +3,6 @@ import DomController from './DomController';
 
 const dom = express.Router();
 
-dom.post('/', DomController.createDom);
+dom.post('/score', DomController.scoreDom);
 
 export default dom;
