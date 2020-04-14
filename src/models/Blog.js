@@ -6,6 +6,7 @@ const BlogSchema = new mongoose.Schema({
     elements: {
         from: String,
         remove: String,
+        unwrap: String,
         h1: {type: String, default: 'h1'},
         h2: {type: String, default: 'h2'},
         h3: {type: String, default: 'h3'},
