@@ -63,50 +63,71 @@ const existsUrl = (url) => {
 
 const parseHTML = (url, domInfo) => {
     return new Promise((resolve, reject) => {
-        axios.get(url)
-            .then(html => {
-                let $ = cheerio.load(html.data);
+            axios.get(url)
+                .then(html => {
+                    let $ = cheerio.load(html.data);
 
-                $ = cheerio.load($(domInfo.from).html());
+                    $ = cheerio.load($(domInfo.from).html());
 
-                $(domInfo.remove).remove();
+                    $(domInfo.remove).remove();
 
-                $(domInfo.unwrap).each(function () {
-                    let $p = $(this).parent();
-                    $(this).insertAfter($(this).parent());
-                    $p.remove()
+                    if (domInfo.unwrap) {
+                        $(domInfo.unwrap).each(function () {
+                            let $p = $(this).parent();
+                            $(this).insertAfter($(this).parent());
+                            $p.remove()
+                        });
+                    }
+
+                    let doms = {
+                        h1: domInfo.h1,
+                        h2: domInfo.h2,
+                        h3: domInfo.h3,
+                        p: domInfo.p,
+                        code: domInfo.code,
+                        img: domInfo.img,
+                        ul: domInfo.ul,
+                        ol: domInfo.ol,
+                        li: domInfo.li,
+                        a: domInfo.a,
+                        blockquote: domInfo.blockquote,
+                        table: domInfo.table
+                    };
+
+                    Object.entries(doms).forEach(entry => {
+                        if (!entry[1]) {
+                            delete doms[entry[0]];
+                        }
+                    });
+
+                    const result = {
+                        h1: 0,
+                        h2: 0,
+                        h3: 0,
+                        p: 0,
+                        img: 0,
+                        code: 0,
+                        ul: 0,
+                        ol: 0,
+                        li: 0,
+                        blockquote: 0,
+                        a: 0,
+                        table: 0
+                    };
+
+                    Object.entries(doms).forEach(entry => {
+                        $(entry[1]).each(() => {
+                            result[entry[0]]++;
+                        });
+                    });
+
+                    resolve(result);
+                })
+                .catch(err => {
+                    reject(err);
                 });
-
-                let doms = [
-                    domInfo.h1, domInfo.h2, domInfo.h3, domInfo.p, domInfo.code, domInfo.img,
-                    domInfo.ul, domInfo.ol, domInfo.ul, domInfo.li, domInfo.a, domInfo.blockquote, domInfo.table
-                ];
-
-                const result = {
-                    h1: 0,
-                    h2: 0,
-                    h3: 0,
-                    p: 0,
-                    img: 0,
-                    code: 0,
-                    ul: 0,
-                    ol: 0,
-                    li: 0,
-                    blockquote: 0,
-                    a: 0,
-                    table: 0
-                };
-
-                $(doms.join(", ")).each((index, element) => {
-                    result[element.name]++;
-                });
-
-                resolve(result);
-            })
-            .catch(err => {
-                reject(err);
-            })
-    });
+        }
+    );
 };
 
 export default {
