@@ -65,8 +65,13 @@ const existsUrl = (url) => {
     }));
 };
 
+const getBlogsCursor = () => {
+    return Blog.find().lean().cursor();
+};
+
 export default {
     saveBlog: saveBlog,
     existsUrl: existsUrl,
     findBlogForPostUrl: findBlogForPostUrl,
+    getBlogsCursor: getBlogsCursor,
 }

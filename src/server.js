@@ -3,12 +3,15 @@ import cors from 'cors';
 
 import blog from './api/blog/index';
 import dom from './api/dom/index';
+import schedules from "./schedules/schedule";
+import cron from 'node-cron';
 
 export default class Server {
 
     constructor() {
         this.app = express();
         this.route();
+        this.schedule();
     }
 
     route() {
@@ -26,5 +29,11 @@ export default class Server {
         app.listen(port, function () {
             console.log('Server is Listening to port ', port);
         });
+    }
+
+    schedule() {
+        Object.values(schedules).forEach(target => {
+            cron.schedule(target.frequency, target.job);
+        })
     }
 }
