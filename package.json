@@ -6,7 +6,8 @@
   "author": "skygl <jupiter9501@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "babel-node ./src/app.js"
+    "start": "babel-node ./src/app.js",
+    "test": "jest ./*.test.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
