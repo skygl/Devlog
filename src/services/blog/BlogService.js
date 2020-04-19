@@ -1,68 +1,45 @@
 import Blog from '../../models/Blog';
 import {DatabaseError} from "../error/error";
-import {DuplicatedBlogUrlExistsError} from "./error/error";
+import {DuplicatedBlogUrlExistsError, NotExistsHandleableBlogError} from "./error/error";
+import '@babel/polyfill';
 
-const saveBlog = (blogInfo) => {
-    return new Promise((resolve, reject) =>
-        existsUrl(blogInfo.url)
-            .then(result => {
-                if (result) {
-                    reject(new DuplicatedBlogUrlExistsError());
-                } else {
-                    let blog = new Blog();
-                    blog.url = blogInfo.url;
-                    blog.feed = blogInfo.feed;
-                    blog.post_regex = blogInfo.post_regex;
-                    blog.elements = blogInfo.elements;
-                    blog.created_at = Date.now();
-                    blog.updated_at = Date.now();
-                    blog.posts = [];
+const saveBlog = async (blogInfo) => {
+    const exists = await existsUrl(blogInfo.url);
+    if (exists) {
+        throw new DuplicatedBlogUrlExistsError();
+    }
 
-                    blog.save()
-                        .then(savedBlog => {
-                            resolve(savedBlog);
-                        })
-                        .catch(err => {
-                            reject(new DatabaseError(err));
-                        });
-                }
-            })
-            .catch(err => {
-                reject(err);
-            })
-    );
+    let blog = new Blog();
+    Object.keys(blogInfo).forEach(key => {
+       blog[key] = blogInfo[key];
+    });
+    blog.created_at = Date.now();
+    blog.updated_at = Date.now();
+    blog.posts = [];
+
+    return blog.save()
+        .catch(err => {
+            throw new DatabaseError(err);
+        });
 };
 
-const findBlogForPostUrl = (postUrl) => {
-    return new Promise((resolve, reject) => {
-        Blog.findOne({$where: "this.post_regex && RegExp(this.post_regex).test(\"" + postUrl + "\")"})
-            .then(savedBlog => {
-                if (savedBlog) {
-                    resolve(savedBlog);
-                } else {
-                    reject(new Error("There is no Blog can handle this post."));
-                }
-            })
-            .catch(err => {
-                reject(new DatabaseError(err));
-            })
-    });
+const findBlogForPostUrl = async (postUrl) => {
+    const savedBlog = await Blog.findOne({$where: "this.post_regex && RegExp(this.post_regex).test(\"" + postUrl + "\")"})
+        .catch(err => {
+            throw new DatabaseError(err);
+        });
+    if (!savedBlog) {
+        throw new NotExistsHandleableBlogError();
+    }
+    return savedBlog;
 };
 
 const existsUrl = (url) => {
-    return new Promise(((resolve, reject) => {
-        Blog.findOne({url: url})
-            .then(savedBlog => {
-                if (savedBlog) {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            })
-            .catch(err => {
-                reject(new DatabaseError(err));
-            })
-    }));
+    return Blog.findOne({url: url})
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+        .then(savedBlog => !!savedBlog);
 };
 
 const getBlogsCursor = () => {

@@ -7,6 +7,7 @@ import mockingoose from "mockingoose";
 import '@babel/polyfill';
 import {DatabaseError} from "../error/error";
 import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
+import {NotExistsHandleableBlogError} from "../blog/error/error";
 jest.mock('axios');
 
 const savedBlog = {
@@ -105,7 +106,7 @@ describe('scoreDom', () => {
 
     test('URL의 포맷에 맞는 블로그가 등록되어 있지 않은 경우 scoreDom 함수가 reject 를 리턴한다.', () => {
         // Given
-        let error = new Error("There is no Blog can handle this post.");
+        let error = new NotExistsHandleableBlogError();
         mockingoose(Blog)
             .toReturn(null, 'findOne');
 

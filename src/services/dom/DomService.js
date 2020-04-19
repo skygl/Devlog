@@ -4,130 +4,83 @@ import BlogService from "../blog/BlogService";
 import axios from 'axios';
 import {DatabaseError} from "../error/error";
 import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
+import '@babel/polyfill';
 
-const scoreDom = (scoreInfo) => {
-    return new Promise(((resolve, reject) => {
-        BlogService.findBlogForPostUrl(scoreInfo.url)
-            .then(blog => {
-                existsUrl(scoreInfo.url)
-                    .then((exists) => {
-                        if (exists) {
-                            reject(new DuplicatedPostUrlExistsError());
-                        }
-                        parseHTML(scoreInfo.url, blog.elements)
-                            .then(domCount => {
-                                let dom = new Dom();
-                                dom.url = scoreInfo.url;
-                                Object.keys(domCount).forEach(key => {
-                                    dom[key] = domCount[key];
-                                });
-                                dom.score = scoreInfo.score;
+const scoreDom = async (scoreInfo) => {
+    const savedBlog = await BlogService.findBlogForPostUrl(scoreInfo.url);
 
-                                dom.save()
-                                    .then(savedDom => {
-                                        resolve(savedDom);
-                                    })
-                                    .catch(err => {
-                                        reject(new DatabaseError(err));
-                                    });
-                            })
-                            .catch(() => {
-                                reject(new HTMLParseError());
-                            });
-                    })
-                    .catch(err => {
-                        reject(err);
-                    })
-            })
-            .catch(err => {
-                reject(err);
-            })
-    }));
+    const savedPost = await existsUrl(scoreInfo.url);
+    if (savedPost) {
+        throw new DuplicatedPostUrlExistsError();
+    }
+
+    const elementsCount = await parseHTML(scoreInfo.url, savedBlog.elements)
+        .catch(() => {
+            throw new HTMLParseError();
+        });
+
+    let dom = new Dom();
+    dom.url = scoreInfo.url;
+    dom.score = scoreInfo.score;
+    Object.keys(elementsCount).forEach(key => {
+        dom[key] = elementsCount[key];
+    });
+
+    return dom.save()
+        .catch(error => {
+            throw new DatabaseError(error);
+        });
 };
 
 const existsUrl = (url) => {
-    return new Promise((resolve, reject) => {
-        Dom.findOne({url: url})
-            .then(savedDom => {
-                if (savedDom) {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            })
-            .catch(err => {
-                reject(new DatabaseError(err));
-            })
-    });
+    return Dom.findOne({url: url})
+        .catch(error => {
+            throw new DatabaseError(error);
+        })
+        .then(savedDom => !!savedDom);
 };
 
-const parseHTML = (url, domInfo) => {
-    return new Promise((resolve, reject) => {
-            axios.get(url)
-                .then(html => {
-                    let $ = cheerio.load(html.data);
+const parseHTML = async (url, domInfo) => {
+    const html = await axios.get(url);
 
-                    $ = cheerio.load($(domInfo.from).html());
+    let $ = cheerio.load(html.data);
+    $ = cheerio.load($(domInfo.from).html());
 
-                    $(domInfo.remove).remove();
+    $(domInfo.remove).remove();
 
-                    if (domInfo.unwrap) {
-                        $(domInfo.unwrap).each(function () {
-                            let $p = $(this).parent();
-                            $(this).insertAfter($(this).parent());
-                            $p.remove()
-                        });
-                    }
+    if (domInfo.unwrap) {
+        $(domInfo.unwrap).each(function() {
+           let $p = $(this).parent();
+           $(this).insertAfter($(this).parent());
+           $p.remove();
+        });
+    }
 
-                    let doms = {
-                        h1: domInfo.h1,
-                        h2: domInfo.h2,
-                        h3: domInfo.h3,
-                        p: domInfo.p,
-                        code: domInfo.code,
-                        img: domInfo.img,
-                        ul: domInfo.ul,
-                        ol: domInfo.ol,
-                        li: domInfo.li,
-                        a: domInfo.a,
-                        blockquote: domInfo.blockquote,
-                        table: domInfo.table
-                    };
+    const elements = ['h1', 'h2', 'h3', 'p', 'code', 'img', 'ul', 'ol', 'li', 'a', 'blockquote', 'table'];
 
-                    Object.entries(doms).forEach(entry => {
-                        if (!entry[1]) {
-                            delete doms[entry[0]];
-                        }
-                    });
+    let doms = {};
+    elements.forEach(element => {
+       doms[element] = domInfo[element];
+    });
 
-                    const result = {
-                        h1: 0,
-                        h2: 0,
-                        h3: 0,
-                        p: 0,
-                        img: 0,
-                        code: 0,
-                        ul: 0,
-                        ol: 0,
-                        li: 0,
-                        blockquote: 0,
-                        a: 0,
-                        table: 0
-                    };
-
-                    Object.entries(doms).forEach(entry => {
-                        $(entry[1]).each(() => {
-                            result[entry[0]]++;
-                        });
-                    });
-
-                    resolve(result);
-                })
-                .catch(err => {
-                    reject(err);
-                });
+    Object.entries(doms).forEach(entry => {
+        if (!entry[1]) {
+            delete doms[entry[0]];
         }
-    );
+    });
+
+    const result = {};
+    elements.forEach(element => {
+        result[element] = 0;
+    });
+
+    Object.entries(doms).forEach(entry => {
+        $(entry[1]).each(() => {
+            result[entry[0]]++;
+        });
+    });
+
+    return result;
 };
 
 export default {
