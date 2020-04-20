@@ -4869,6 +4869,11 @@ test-exclude@^6.0.0:
     glob "^7.1.4"
     minimatch "^3.0.4"
 
+tfjs-node-save@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/tfjs-node-save/-/tfjs-node-save-0.0.2.tgz#330ea085ea1d2f16449f28bcc055f9f4b412a615"
+  integrity sha512-6h+E2oLFf540B6Z9Wz7+ImfxkaNSqL+PUh5a08Dgk5GIHr9Irz8/in7yqbI87TkoUNPE3IgK4GAfGOnntzqjtQ==
+
 throat@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/throat/-/throat-5.0.0.tgz#c5199235803aad18754a667d659b5e72ce16764b"
