@@ -49,10 +49,10 @@ const parseHTML = async (url, domInfo) => {
     $(domInfo.remove).remove();
 
     if (domInfo.unwrap) {
-        $(domInfo.unwrap).each(function() {
-           let $p = $(this).parent();
-           $(this).insertAfter($(this).parent());
-           $p.remove();
+        $(domInfo.unwrap).each(function () {
+            let $p = $(this).parent();
+            $(this).insertAfter($(this).parent());
+            $p.remove();
         });
     }
 
@@ -60,7 +60,7 @@ const parseHTML = async (url, domInfo) => {
 
     let doms = {};
     elements.forEach(element => {
-       doms[element] = domInfo[element];
+        doms[element] = domInfo[element];
     });
 
     Object.entries(doms).forEach(entry => {
@@ -83,6 +83,11 @@ const parseHTML = async (url, domInfo) => {
     return result;
 };
 
+const findDom = async () => {
+    return Dom.find().lean();
+};
+
 export default {
-    scoreDom: scoreDom
+    scoreDom: scoreDom,
+    findDom: findDom,
 }
