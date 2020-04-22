@@ -4,7 +4,7 @@ import BlogService from "../blog/BlogService";
 import mockingoose from "mockingoose";
 import {copy} from '../../utils/Utils';
 import '@babel/polyfill';
-import {ExistsUrlError} from "./error/error";
+import {ExistsUrlError, NotExistsUnprocessedBlogReqError} from "./error/error";
 import {DatabaseError} from "../error/error";
 
 const blogInfo = {
@@ -87,5 +87,40 @@ describe('createBlogReq', () => {
 
         // Then
         expect(copy(result)).toMatchObject(savedBlogReqInfo);
+    });
+});
+
+describe('findUnprocessedBlogReq', () => {
+    test('처리되지 않은 BlogReq 가 없는 경우 findUnprocessedBlogReq 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new NotExistsUnprocessedBlogReqError();
+        mockingoose(BlogReq)
+            .toReturn(null, 'findOne');
+
+        // When & Then
+        return expect(BlogReqService.findUnprocessedBlogReq()).rejects.toThrow(error);
+    });
+
+    test('BlogReq의 findOne 함수가 에러를 발생시키면 findUnprocessedBlogReq 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new Error("Database Error Occurs.");
+        let databaseError = new DatabaseError(error);
+        mockingoose(BlogReq)
+            .toReturn(error, 'findOne');
+
+        // When & Then
+        return expect(BlogReqService.findUnprocessedBlogReq()).rejects.toThrow(databaseError);
+    });
+
+    test('findUnprocessedBlogReq 함수를 성공한다.', async () => {
+        // Given
+        mockingoose(BlogReq)
+            .toReturn(savedBlogReqInfo, 'findOne');
+
+        // When
+        let result = await BlogReqService.findUnprocessedBlogReq();
+
+        // Then
+        expect(copy(result)).toMatchObject({url: blogInfo.url, _id: savedBlogReqInfo._id})
     });
 });
