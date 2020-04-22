@@ -83,8 +83,24 @@ const parseHTML = async (url, domInfo) => {
     return result;
 };
 
-const findDom = async () => {
-    return Dom.find().lean();
+const findDom = async ({scored, fromDate, endDate} = {}) => {
+    let condition = {};
+    condition.created_at = {};
+    if (scored !== undefined && scored !== null) {
+        condition.score = {};
+        condition.score.$exists = scored;
+    }
+    if (fromDate !== undefined && fromDate !== null) {
+        condition.created_at.$gte = fromDate;
+    }
+    if (endDate !== undefined && endDate !== null) {
+        condition.created_at.$lt = endDate;
+    }
+    if (Object.keys(condition.created_at).length === 0) {
+        delete condition.created_at;
+    }
+    console.log(condition);
+    return Dom.find(condition).lean();
 };
 
 export default {
