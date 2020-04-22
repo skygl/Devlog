@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 const BlogReqSchema = new mongoose.Schema({
     url: String,
-    processed: Boolean,
-    accepted: Boolean,
+    processed: {type: Boolean, default: false},
+    accepted: {type: Boolean, default: false},
     created_at: {type: Date, default: Date.now()}
 });
 
