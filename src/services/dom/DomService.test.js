@@ -1,7 +1,7 @@
 import DomService from "./DomService";
 import Blog from "../../models/Blog";
 import Dom from '../../models/Dom';
-import copy from '../../utils/Utils';
+import {copy} from '../../utils/Utils';
 import axios from 'axios';
 import mockingoose from "mockingoose";
 import '@babel/polyfill';

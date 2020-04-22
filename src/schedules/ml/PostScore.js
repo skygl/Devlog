@@ -3,7 +3,7 @@ import DomService from "../../services/dom/DomService";
 import fs from 'fs';
 import path from 'path';
 import 'tfjs-node-save';
-import getDate from '../../utils/Utils';
+import {getDate} from '../../utils/Utils';
 
 const SCORE_CLASSES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const SCORE_COUNT = SCORE_CLASSES.length;

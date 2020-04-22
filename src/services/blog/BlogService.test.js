@@ -2,7 +2,7 @@ import Blog from '../../models/Blog';
 import BlogService from "./BlogService";
 import {DatabaseError} from "../error/error";
 import {DuplicatedBlogUrlExistsError} from "./error/error";
-import copy from '../../utils/Utils';
+import {copy} from '../../utils/Utils';
 import mockingoose from "mockingoose";
 import '@babel/polyfill';
 
