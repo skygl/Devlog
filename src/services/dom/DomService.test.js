@@ -6,7 +6,12 @@ import axios from 'axios';
 import mockingoose from "mockingoose";
 import '@babel/polyfill';
 import {DatabaseError} from "../error/error";
-import {DuplicatedPostUrlExistsError, HTMLParseError, NotExistsUnscoredDomError} from "./error/error";
+import {
+    DuplicatedPostUrlExistsError,
+    HTMLParseError,
+    NotExistsDomError,
+    NotExistsUnscoredDomError
+} from "./error/error";
 import {NotExistsHandleableBlogError} from "../blog/error/error";
 
 jest.mock('axios');
@@ -88,6 +93,9 @@ const savedExpectedScoreDom = {
     expected_score: 9,
     created_at: new Date().toISOString(),
 };
+
+const savedScoredAndExpectedScoredDom = copy(savedExpectedScoreDom);
+savedScoredAndExpectedScoredDom.score = 8;
 
 const postHtml =
     `
@@ -348,5 +356,53 @@ describe('findUnscoredDom', () => {
 
         // Then
         expect(copy(savedDom)).toMatchObject(savedExpectedScoreDom);
+    });
+});
+
+describe('scoreUnscoredDom', () => {
+    test('Dom의 findOne 함수가 에러를 발생시키면 scoreUnscoredDom 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new Error("Database Error Occurs.");
+        let databaseError = new DatabaseError(error);
+        mockingoose(Dom)
+            .toReturn(error, 'findOne');
+
+        // When & Then
+        return expect(DomService.scoreUnscoredDom(scoreInfo)).rejects.toThrow(databaseError);
+    });
+
+    test('점수 등록을 요청 받은 Dom 의 Url 이 존재하지 않으면 scoreUnscoredDom 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new NotExistsDomError(scoreInfo.url);
+        mockingoose(Dom)
+            .toReturn(null, 'findOne');
+
+        // When & Then
+        return expect(DomService.scoreUnscoredDom(scoreInfo)).rejects.toThrow(error);
+    });
+
+    test('Dom의 findOneAndUpdate 함수가 에러를 발생시키면 scoreUnscoredDom 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new Error("Database Error Occurs.");
+        let databaseError = new DatabaseError(error);
+        mockingoose(Dom)
+            .toReturn(savedExpectedScoreDom, 'findOne')
+            .toReturn(error, 'findOneAndUpdate');
+
+        // When & Then
+        return expect(DomService.scoreUnscoredDom(scoreInfo)).rejects.toThrow(databaseError);
+    });
+
+    test('scoreUnscoredDom 함수를 성공한다.', async () => {
+        // Given
+        mockingoose(Dom)
+            .toReturn(savedExpectedScoreDom, 'findOne')
+            .toReturn(savedScoredAndExpectedScoredDom, 'findOneAndUpdate');
+
+        // When
+        let result = await DomService.scoreUnscoredDom(scoreInfo);
+
+        // Then
+        expect(copy(result)).toMatchObject(savedScoredAndExpectedScoredDom);
     });
 });
