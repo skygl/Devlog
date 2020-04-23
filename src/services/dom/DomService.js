@@ -6,6 +6,15 @@ import {DatabaseError} from "../error/error";
 import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
 import '@babel/polyfill';
 
+const createDom = async (expectedScoreInfo) => {
+    let dom = new Dom();
+    dom.url = expectedScoreInfo.url;
+    dom.expected_score = expectedScoreInfo.expected_score;
+    dom.score = null;
+
+    return saveDom(dom);
+};
+
 const scoreUnsavedDom = async (scoreInfo) => {
     let dom = new Dom();
     dom.url = scoreInfo.url;
@@ -109,6 +118,7 @@ const findDom = async ({scored, fromDate, endDate} = {}) => {
 };
 
 export default {
+    createDom: createDom,
     scoreUnsavedDom: scoreUnsavedDom,
     findDom: findDom,
 }
