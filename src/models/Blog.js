@@ -25,14 +25,7 @@ const BlogSchema = new mongoose.Schema({
         tag: String
     },
     created_at: Date,
-    updated_at: {type: Date, default: Date.now()},
-    posts: [{
-        url: String,
-        tags: [String],
-        created_at: Date,
-        published_at: Date,
-        updated_at: Date
-    }]
+    updated_at: {type: Date, default: Date.now()}
 });
 
 module.exports = mongoose.model('Blog', BlogSchema);

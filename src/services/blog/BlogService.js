@@ -15,7 +15,6 @@ const saveBlog = async (blogInfo) => {
     });
     blog.created_at = Date.now();
     blog.updated_at = Date.now();
-    blog.posts = [];
 
     return blog.save()
         .catch(err => {

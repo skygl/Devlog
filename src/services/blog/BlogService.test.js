@@ -34,7 +34,6 @@ const blogInfo = {
 
 const savedBlogInfo = copy(blogInfo);
 savedBlogInfo["_id"] = '4e3444818cde747f02000001';
-savedBlogInfo["posts"] = [];
 savedBlogInfo["updated_at"] = new Date().toISOString();
 
 describe('saveBlog', () => {

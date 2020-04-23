@@ -65,7 +65,6 @@ const blogReqInfo = {
 
 const savedBlog = copy(blogReqInfo);
 savedBlog["_id"] = '4e3444818cde747f02000002';
-savedBlog["posts"] = [];
 savedBlog["created_at"] = new Date().toISOString();
 savedBlog["updated_at"] = new Date().toISOString();
 
