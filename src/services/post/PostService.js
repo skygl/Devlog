@@ -29,6 +29,17 @@ const existsPostUrl = async (url) => {
         .then(savedPost => !!savedPost);
 };
 
+const findByTag = async (tagInfo) => {
+    return Post.find({tags: {$in: tagInfo.tag}})
+        .sort({score: -1})
+        .skip(5 * (tagInfo["page"] - 1))
+        .limit(5)
+        .catch(error => {
+            throw new DatabaseError(error);
+        })
+};
+
 export default {
     savePost: savePost,
+    findByTag: findByTag,
 }
