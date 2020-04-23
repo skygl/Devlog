@@ -2,13 +2,8 @@ import cheerio from 'cheerio';
 import Dom from '../../models/Dom';
 import BlogService from "../blog/BlogService";
 import axios from 'axios';
-import {DatabaseError} from "../error/error";
-import {
-    DuplicatedPostUrlExistsError,
-    HTMLParseError,
-    NotExistsDomError,
-    NotExistsUnscoredDomError
-} from "./error/error";
+import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
+import {HTMLParseError, NotExistsDomError, NotExistsUnscoredDomError} from "./error/error";
 import '@babel/polyfill';
 
 const createDom = async (expectedScoreInfo) => {

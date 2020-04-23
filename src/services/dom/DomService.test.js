@@ -5,13 +5,8 @@ import {copy} from '../../utils/Utils';
 import axios from 'axios';
 import mockingoose from "mockingoose";
 import '@babel/polyfill';
-import {DatabaseError} from "../error/error";
-import {
-    DuplicatedPostUrlExistsError,
-    HTMLParseError,
-    NotExistsDomError,
-    NotExistsUnscoredDomError
-} from "./error/error";
+import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
+import {HTMLParseError, NotExistsDomError, NotExistsUnscoredDomError} from "./error/error";
 import {NotExistsHandleableBlogError} from "../blog/error/error";
 
 jest.mock('axios');
@@ -43,7 +38,6 @@ const savedBlog = {
     },
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    posts: [],
 };
 
 const scoreInfo = {
