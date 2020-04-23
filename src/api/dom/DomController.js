@@ -5,7 +5,7 @@ import {DuplicatedPostUrlExistsError, HTMLParseError} from "../../services/dom/e
 export default {
 
     async scoreDom(req, res) {
-        DomService.scoreDom(req.body)
+        DomService.scoreUnsavedDom(req.body)
             .then(result => res.json(result))
             .catch(error => {
                 if (error instanceof DatabaseError) {

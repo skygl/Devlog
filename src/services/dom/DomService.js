@@ -6,22 +6,27 @@ import {DatabaseError} from "../error/error";
 import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
 import '@babel/polyfill';
 
-const scoreDom = async (scoreInfo) => {
-    const savedBlog = await BlogService.findBlogForPostUrl(scoreInfo.url);
+const scoreUnsavedDom = async (scoreInfo) => {
+    let dom = new Dom();
+    dom.url = scoreInfo.url;
+    dom.score = scoreInfo.score;
 
-    const savedPost = await existsUrl(scoreInfo.url);
+    return saveDom(dom);
+};
+
+const saveDom = async (dom) => {
+    const savedBlog = await BlogService.findBlogForPostUrl(dom.url);
+
+    const savedPost = await existsUrl(dom.url);
     if (savedPost) {
         throw new DuplicatedPostUrlExistsError();
     }
 
-    const elementsCount = await parseHTML(scoreInfo.url, savedBlog.elements)
+    const elementsCount = await parseHTML(dom.url, savedBlog.elements)
         .catch(() => {
             throw new HTMLParseError();
         });
 
-    let dom = new Dom();
-    dom.url = scoreInfo.url;
-    dom.score = scoreInfo.score;
     Object.keys(elementsCount).forEach(key => {
         dom[key] = elementsCount[key];
     });
@@ -104,6 +109,6 @@ const findDom = async ({scored, fromDate, endDate} = {}) => {
 };
 
 export default {
-    scoreDom: scoreDom,
+    scoreUnsavedDom: scoreUnsavedDom,
     findDom: findDom,
 }

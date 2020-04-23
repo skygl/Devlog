@@ -8,6 +8,7 @@ import '@babel/polyfill';
 import {DatabaseError} from "../error/error";
 import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
 import {NotExistsHandleableBlogError} from "../blog/error/error";
+
 jest.mock('axios');
 
 const savedBlog = {
@@ -101,7 +102,7 @@ describe('scoreDom', () => {
             .toReturn(error, 'findOne');
 
         // When & Then
-        return expect(DomService.scoreDom(scoreInfo)).rejects.toThrow(new DatabaseError(error));
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(new DatabaseError(error));
     });
 
     test('URL의 포맷에 맞는 블로그가 등록되어 있지 않은 경우 scoreDom 함수가 reject 를 리턴한다.', () => {
@@ -111,7 +112,7 @@ describe('scoreDom', () => {
             .toReturn(null, 'findOne');
 
         // When & Then
-        return expect(DomService.scoreDom(scoreInfo)).rejects.toThrow(error);
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(error);
     });
 
     test('DomService의 existsUrl 함수에서 에러가 발생하는 경우 scoreDom 함수가 reject 를 리턴한다.', () => {
@@ -123,7 +124,7 @@ describe('scoreDom', () => {
             .toReturn(error, 'findOne');
 
         // When & Then
-        return expect(DomService.scoreDom(scoreInfo)).rejects.toThrow(new DatabaseError(error));
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(new DatabaseError(error));
     });
 
     test('이미 등록된 URL을 가지고 있는 경우 scoreDom 함수가 reject 를 리턴한다.', () => {
@@ -135,7 +136,7 @@ describe('scoreDom', () => {
             .toReturn(savedDom, "findOne");
 
         // When & Then
-        return expect(DomService.scoreDom(scoreInfo)).rejects.toThrow(error);
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(error);
     });
 
     test('axios get 함수에서 에러가 발생하는 경우 scoreDom 함수가 reject를 리턴한다.', () => {
@@ -150,7 +151,7 @@ describe('scoreDom', () => {
             .toReturn(null, "findOne");
 
         // When & Then
-        return expect(DomService.scoreDom(scoreInfo)).rejects.toThrow(new HTMLParseError(error));
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(new HTMLParseError(error));
     });
 
     test('Dom save 함수에서 에러가 발생하는 경우 scoreDom 함수가 reject를 리턴한다.', () => {
@@ -168,7 +169,7 @@ describe('scoreDom', () => {
             .toReturn(error, "save");
 
         // When & Then
-        return expect(DomService.scoreDom(scoreInfo)).rejects.toThrow(new DatabaseError(error));
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(new DatabaseError(error));
     });
 
     test('scoreDom 함수를 성공한다.', async () => {
@@ -185,7 +186,7 @@ describe('scoreDom', () => {
             .toReturn(savedDom, "save");
 
         // When
-        let result = await DomService.scoreDom(scoreInfo);
+        let result = await DomService.scoreUnsavedDom(scoreInfo);
 
         // Then
         expect(copy(result)).toMatchObject(savedDom);
