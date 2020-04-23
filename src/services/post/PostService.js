@@ -1,4 +1,5 @@
 import Post from '../../models/Post';
+import {getDate} from '../../utils/Utils';
 import '@babel/polyfill';
 import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
 
@@ -39,7 +40,19 @@ const findByTag = async (tagInfo) => {
         })
 };
 
+const findTop5PostsPublishedYesterday = async () => {
+    let gte_date = getDate(new Date(), {day: -1, hours: 0, min: 0, sec: 0, ms: 0});
+    let lt_date = getDate(new Date(), {day: 0, hours: 0, min: 0, set: 0, ms: 0});
+    return Post.find({published_at: {$gte: gte_date, $lt: lt_date}})
+        .sort({score: -1})
+        .limit(5)
+        .catch(error => {
+            throw new DatabaseError(error);
+        })
+};
+
 export default {
     savePost: savePost,
     findByTag: findByTag,
+    findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
 }
