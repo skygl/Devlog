@@ -3,7 +3,7 @@ import Dom from '../../models/Dom';
 import BlogService from "../blog/BlogService";
 import axios from 'axios';
 import {DatabaseError} from "../error/error";
-import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
+import {DuplicatedPostUrlExistsError, HTMLParseError, NotExistsUnscoredDomError} from "./error/error";
 import '@babel/polyfill';
 
 const createDom = async (expectedScoreInfo) => {
@@ -117,8 +117,22 @@ const findDom = async ({scored, fromDate, endDate} = {}) => {
     return Dom.find(condition).lean();
 };
 
+const findUnscoredDom = async () => {
+    let doms = await Dom.findOne({score: {$eq: null}})
+        .catch(error => {
+            throw new DatabaseError(error);
+        });
+
+    if (doms) {
+        return doms;
+    } else {
+        throw new NotExistsUnscoredDomError();
+    }
+};
+
 export default {
     createDom: createDom,
     scoreUnsavedDom: scoreUnsavedDom,
     findDom: findDom,
+    findUnscoredDom: findUnscoredDom,
 }

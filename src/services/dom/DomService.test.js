@@ -6,7 +6,7 @@ import axios from 'axios';
 import mockingoose from "mockingoose";
 import '@babel/polyfill';
 import {DatabaseError} from "../error/error";
-import {DuplicatedPostUrlExistsError, HTMLParseError} from "./error/error";
+import {DuplicatedPostUrlExistsError, HTMLParseError, NotExistsUnscoredDomError} from "./error/error";
 import {NotExistsHandleableBlogError} from "../blog/error/error";
 
 jest.mock('axios');
@@ -84,6 +84,7 @@ const savedExpectedScoreDom = {
     blockquote: 2,
     a: 2,
     table: 1,
+    score: null,
     expected_score: 9,
     created_at: new Date().toISOString(),
 };
@@ -312,5 +313,40 @@ describe('createDom', () => {
 
         // Then
         expect(copy(result)).toMatchObject(savedExpectedScoreDom);
+    });
+});
+
+describe('findUnscoredDom', () => {
+    test('Dom의 findOne 함수가 에러를 발생시키면 findUnscoredDom 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new Error("Database Error Occurs.");
+        let databaseError = new DatabaseError(error);
+        mockingoose(Dom)
+            .toReturn(error, 'findOne');
+
+        // When & Then
+        return expect(DomService.findUnscoredDom()).rejects.toThrow(databaseError);
+    });
+
+    test('점수를 매겨야하는 Dom 이 존재하지 않으면 findUnscoredDom 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        let error = new NotExistsUnscoredDomError();
+        mockingoose(Dom)
+            .toReturn(null, 'findOne');
+
+        // When & Then
+        return expect(DomService.findUnscoredDom()).rejects.toThrow(error);
+    });
+
+    test('findUnscoredDom 함수를 성공한다.', async () => {
+        // Given
+        mockingoose(Dom)
+            .toReturn(savedExpectedScoreDom, 'findOne');
+
+        // When
+        let savedDom = await DomService.findUnscoredDom();
+
+        // Then
+        expect(copy(savedDom)).toMatchObject(savedExpectedScoreDom);
     });
 });
