@@ -15,6 +15,7 @@ const DomSchema = new mongoose.Schema({
     a: {type: Number, default: 0},
     table: {type: Number, default: 0},
     score: Number,
+    expected_score: Number,
     created_at: {type: Date, default: Date.now()}
 });
 
