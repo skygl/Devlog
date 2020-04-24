@@ -4,6 +4,7 @@ import Dom from '../../models/Dom';
 import {copy} from '../../utils/Utils';
 import axios from 'axios';
 import mockingoose from "mockingoose";
+import DomCrawler from "../../modules/DomCrawler";
 import '@babel/polyfill';
 import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
 import {HTMLParseError, NotExistsDomError, NotExistsUnscoredDomError} from "./error/error";
@@ -45,9 +46,37 @@ const scoreInfo = {
     score: 9,
 };
 
-const expectedScoreInfo = {
+const expectedDomInfo = {
     url: "https://velog.io/@skygl/node-js",
     expected_score: 9,
+    score: null,
+    h1: 1,
+    h2: 2,
+    h3: 3,
+    p: 4,
+    img: 5,
+    code: 2,
+    ul: 3,
+    ol: 1,
+    li: 5,
+    blockquote: 2,
+    a: 2,
+    table: 1,
+};
+
+const domInfo = {
+    h1: 1,
+    h2: 2,
+    h3: 3,
+    p: 4,
+    img: 5,
+    code: 2,
+    ul: 3,
+    ol: 1,
+    li: 5,
+    blockquote: 2,
+    a: 2,
+    table: 1
 };
 
 const savedDom = {
@@ -165,11 +194,11 @@ describe('scoreUnsavedDom', () => {
         return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(error);
     });
 
-    test('axios get 함수에서 에러가 발생하는 경우 scoreDom 함수가 reject를 리턴한다.', () => {
+    test('DomCrawler 모듈의 crawlDom 함수에서 에러가 발생하는 경우 scoreDom 함수가 reject를 리턴한다.', () => {
         // Given
         let error = new Error("Axios Error Occurs.");
-        axios.get.mockImplementationOnce(() => {
-            return Promise.reject(error);
+        DomCrawler.crawlDom = jest.fn(async () => {
+            throw new error
         });
         mockingoose(Blog)
             .toReturn(savedBlog, "findOne");
@@ -177,17 +206,16 @@ describe('scoreUnsavedDom', () => {
             .toReturn(null, "findOne");
 
         // When & Then
-        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(new HTMLParseError(error));
+        return expect(DomService.scoreUnsavedDom(scoreInfo)).rejects.toThrow(new HTMLParseError());
     });
 
     test('Dom save 함수에서 에러가 발생하는 경우 scoreDom 함수가 reject를 리턴한다.', () => {
         // Given
         let error = new Error("Database Error Occurs.");
-        axios.get.mockImplementationOnce(() => {
-            return Promise.resolve({
-                data: postHtml
-            })
-        });
+        DomCrawler.crawlDom = jest.fn(async () => {
+                return domInfo;
+            }
+        );
         mockingoose(Blog)
             .toReturn(savedBlog, "findOne");
         mockingoose(Dom)
@@ -200,11 +228,10 @@ describe('scoreUnsavedDom', () => {
 
     test('scoreDom 함수를 성공한다.', async () => {
         // Given
-        axios.get.mockImplementationOnce(() => {
-            return Promise.resolve({
-                data: postHtml
-            })
-        });
+        DomCrawler.crawlDom = jest.fn(async () => {
+                return domInfo;
+            }
+        );
         mockingoose(Blog)
             .toReturn(savedBlog, "findOne");
         mockingoose(Dom)
@@ -220,98 +247,23 @@ describe('scoreUnsavedDom', () => {
 });
 
 describe('createDom', () => {
-    test('BlogService 의 findBlogForPostUrl 함수에서 에러가 발생하는 경우 createDom 함수가 reject 를 리턴한다.', () => {
-        // Given
-        let error = new Error("Database Error Occurs.");
-        mockingoose(Blog)
-            .toReturn(error, 'findOne');
-
-        // When & Then
-        return expect(DomService.createDom(expectedScoreInfo)).rejects.toThrow(new DatabaseError(error));
-    });
-
-    test('URL의 포맷에 맞는 블로그가 등록되어 있지 않은 경우 createDom 함수가 reject 를 리턴한다.', () => {
-        // Given
-        let error = new NotExistsHandleableBlogError();
-        mockingoose(Blog)
-            .toReturn(null, 'findOne');
-
-        // When & Then
-        return expect(DomService.createDom(expectedScoreInfo)).rejects.toThrow(error);
-    });
-
-    test('DomService의 existsUrl 함수에서 에러가 발생하는 경우 createDom 함수가 reject 를 리턴한다.', () => {
-        // Given
-        let error = new Error("Database Error Occurs.");
-        mockingoose(Blog)
-            .toReturn(savedBlog, 'findOne');
-        mockingoose(Dom)
-            .toReturn(error, 'findOne');
-
-        // When & Then
-        return expect(DomService.createDom(expectedScoreInfo)).rejects.toThrow(new DatabaseError(error));
-    });
-
-    test('이미 등록된 URL을 가지고 있는 경우 createDom 함수가 reject 를 리턴한다.', () => {
-        // Given
-        let error = new DuplicatedPostUrlExistsError();
-        mockingoose(Blog)
-            .toReturn(savedBlog, "findOne");
-        mockingoose(Dom)
-            .toReturn(savedDom, "findOne");
-
-        // When & Then
-        return expect(DomService.createDom(expectedScoreInfo)).rejects.toThrow(error);
-    });
-
-    test('axios get 함수에서 에러가 발생하는 경우 createDom 함수가 reject를 리턴한다.', () => {
-        // Given
-        let error = new Error("Axios Error Occurs.");
-        axios.get.mockImplementationOnce(() => {
-            return Promise.reject(error);
-        });
-        mockingoose(Blog)
-            .toReturn(savedBlog, "findOne");
-        mockingoose(Dom)
-            .toReturn(null, "findOne");
-
-        // When & Then
-        return expect(DomService.createDom(expectedScoreInfo)).rejects.toThrow(new HTMLParseError(error));
-    });
-
     test('Dom save 함수에서 에러가 발생하는 경우 createDom 함수가 reject를 리턴한다.', () => {
         // Given
         let error = new Error("Database Error Occurs.");
-        axios.get.mockImplementationOnce(() => {
-            return Promise.resolve({
-                data: postHtml
-            })
-        });
-        mockingoose(Blog)
-            .toReturn(savedBlog, "findOne");
         mockingoose(Dom)
-            .toReturn(null, "findOne")
             .toReturn(error, "save");
 
         // When & Then
-        return expect(DomService.createDom(expectedScoreInfo)).rejects.toThrow(new DatabaseError(error));
+        return expect(DomService.createDom(expectedDomInfo)).rejects.toThrow(new DatabaseError(error));
     });
 
     test('scoreDom 함수를 성공한다.', async () => {
         // Given
-        axios.get.mockImplementationOnce(() => {
-            return Promise.resolve({
-                data: postHtml
-            })
-        });
-        mockingoose(Blog)
-            .toReturn(savedBlog, "findOne");
         mockingoose(Dom)
-            .toReturn(null, "findOne")
             .toReturn(savedExpectedScoreDom, "save");
 
         // When
-        let result = await DomService.createDom(expectedScoreInfo);
+        let result = await DomService.createDom(expectedDomInfo);
 
         // Then
         expect(copy(result)).toMatchObject(savedExpectedScoreDom);

@@ -5,13 +5,21 @@ import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
 import {HTMLParseError, NotExistsDomError, NotExistsUnscoredDomError} from "./error/error";
 import '@babel/polyfill';
 
-const createDom = async (expectedScoreInfo) => {
-    let dom = new Dom();
-    dom.url = expectedScoreInfo.url;
-    dom.expected_score = expectedScoreInfo.expected_score;
-    dom.score = null;
+const elements = ['h1', 'h2', 'h3', 'p', 'code', 'img', 'ul', 'ol', 'li', 'a', 'blockquote', 'table'];
 
-    return saveDom(dom);
+const createDom = async (domInfo) => {
+    let dom = new Dom();
+    dom.url = domInfo.url;
+    dom.expected_score = domInfo.expected_score;
+    dom.score = null;
+    elements.forEach(element => {
+        dom[element] = domInfo[element];
+    });
+
+    return dom.save()
+        .catch(error => {
+            throw new DatabaseError(error);
+        });
 };
 
 const scoreUnscoredDom = async (scoreInfo) => {
