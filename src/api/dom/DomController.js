@@ -1,6 +1,6 @@
 import DomService from "../../services/dom/DomService";
-import {DatabaseError} from "../../services/error/error";
-import {DuplicatedPostUrlExistsError, HTMLParseError} from "../../services/dom/error/error";
+import {DatabaseError, DuplicatedPostUrlExistsError} from "../../services/error/error";
+import {HTMLParseError} from "../../services/dom/error/error";
 
 export default {
 
