@@ -53,6 +53,14 @@ async function loadOrTrainModel(doms) {
 }
 
 async function saveModel(model) {
+    const modelPath = path.resolve(__dirname, '/model' + (isFirstModel ? '2' : '1') + '/model.json');
+    const weightsPath = path.resolve(__dirname, '/model' + (isFirstModel ? '2' : '1') + '/weights.bin');
+    if (fs.existsSync(modelPath)) {
+        fs.unlinkSync(modelPath);
+    }
+    if (fs.existsSync(weightsPath)) {
+        fs.unlinkSync(weightsPath);
+    }
     return model.save('file://' + __dirname + '/model' + (isFirstModel ? '2' : '1'));
 }
 

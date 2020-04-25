@@ -11,10 +11,10 @@ const saveBlog = async (blogInfo) => {
 
     let blog = new Blog();
     Object.keys(blogInfo).forEach(key => {
-       blog[key] = blogInfo[key];
+        blog[key] = blogInfo[key];
     });
-    blog.created_at = Date.now();
-    blog.updated_at = Date.now();
+    blog.created_at = new Date();
+    blog.updated_at = new Date();
 
     return blog.save()
         .catch(err => {

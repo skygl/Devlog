@@ -3,11 +3,11 @@ import PostScore from "./ml/PostScore";
 
 export default {
     RssCrawler: {
-        frequency: "0 0 1 * *",
+        frequency: "5 12 * * *",
         job: RssCrawler.crawlNewPosts
     },
     TrainScoreModel: {
-        frequency: "0 0 2 * *",
+        frequency: "40 12 * * *",
         job: PostScore.trainNewModel
     }
 }

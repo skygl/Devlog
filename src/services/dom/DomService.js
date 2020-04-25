@@ -12,6 +12,7 @@ const createDom = async (domInfo) => {
     dom.url = domInfo.url;
     dom.expected_score = domInfo.expected_score;
     dom.score = null;
+    dom.created_at = new Date();
     elements.forEach(element => {
         dom[element] = domInfo[element];
     });
@@ -43,6 +44,7 @@ const scoreUnsavedDom = async (scoreInfo) => {
     let dom = new Dom();
     dom.url = scoreInfo.url;
     dom.score = scoreInfo.score;
+    dom.created_at = new Date();
 
     return saveDom(dom);
 };

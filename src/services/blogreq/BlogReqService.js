@@ -20,6 +20,7 @@ const createBlogReq = async (blogInfo) => {
 
     let blogReq = new BlogReq();
     blogReq.url = url;
+    blogReq.created_at = Date.now();
 
     return blogReq.save();
 };

@@ -1,4 +1,5 @@
 import cheerio from "cheerio";
+import axios from "axios";
 
 const crawlDom = async (url, domInfo) => {
     const html = await axios.get(url);
