@@ -4,6 +4,12 @@ import {HTMLParseError} from "../../services/dom/error/error";
 
 export default {
 
+    async testDom(req, res) {
+        DomService.testDom(req.body)
+            .then(result => res.status(200).json(result))
+            .catch(error => res.status(500).json({message: error.message}));
+    },
+
     async scoreDom(req, res) {
         DomService.scoreUnsavedDom(req.body)
             .then(result => res.json(result))

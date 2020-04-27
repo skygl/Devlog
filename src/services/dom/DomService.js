@@ -7,6 +7,10 @@ import '@babel/polyfill';
 
 const elements = ['h1', 'h2', 'h3', 'p', 'code', 'img', 'ul', 'ol', 'li', 'a', 'blockquote', 'table'];
 
+const testDom = async (domInfo) => {
+    return DomCrawler.crawlDom(domInfo.url, domInfo.domInfo);
+};
+
 const createDom = async (domInfo) => {
     let dom = new Dom();
     dom.url = domInfo.url;
@@ -114,6 +118,7 @@ const findUnscoredDom = async () => {
 };
 
 export default {
+    testDom: testDom,
     createDom: createDom,
     scoreUnscoredDom: scoreUnscoredDom,
     scoreUnsavedDom: scoreUnsavedDom,
