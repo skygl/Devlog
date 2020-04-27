@@ -35,6 +35,10 @@ const crawlDom = async (url, domInfo) => {
         result[element] = 0;
     });
 
+    $("p").filter(function () {
+        return $(this).children().length + $(this).text().replace(/\s+|&nbsp;/g, "").length === 0;
+    }).remove();
+
     Object.entries(doms).forEach(entry => {
         $(entry[1]).each(() => {
             result[entry[0]]++;
