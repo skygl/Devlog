@@ -90,6 +90,7 @@ const findDom = async ({scored, fromDate, endDate} = {}) => {
     if (scored !== undefined && scored !== null) {
         condition.score = {};
         condition.score.$exists = scored;
+        condition.score.$ne = null;
     }
     if (fromDate !== undefined && fromDate !== null) {
         condition.created_at.$gte = fromDate;
@@ -105,7 +106,7 @@ const findDom = async ({scored, fromDate, endDate} = {}) => {
 };
 
 const findUnscoredDom = async () => {
-    let doms = await Dom.findOne({score: {$eq: null}})
+    let doms = await Dom.findOne({$or: [{score: {$eq: null}}, {score: {$exists: false}}]})
         .catch(error => {
             throw new DatabaseError(error);
         });
