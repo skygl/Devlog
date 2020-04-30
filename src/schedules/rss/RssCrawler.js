@@ -5,8 +5,10 @@ import DomCrawler from "../../modules/DomCrawler";
 import RssCrawler from "../../modules/RssCrawler";
 import ScoringModel from "../../modules/ScoringModel";
 import {copy} from "../../utils/Utils";
+import logger from "../../utils/Logger";
 
 const crawlNewPosts = async () => {
+    logger.info("Crawling New Posts Starts.");
     BlogService.getBlogsCursor()
         .on('data', async function (doc) {
             let posts = await RssCrawler.crawlRss(doc);
@@ -22,9 +24,16 @@ const crawlNewPosts = async () => {
                         await DomService.createDom(domInfo);
                     })
                     .catch(error => {
-                        console.error(error);
+                        logger.error({
+                            message: "Error Occurs During Crawling Post",
+                            url: post.url,
+                            error: error
+                        });
                     })
             });
+        })
+        .on('end', function () {
+            logger.info("Crawling New Posts Finished.");
         });
 };
 

@@ -1,6 +1,7 @@
 import DomService from "../../services/dom/DomService";
 import {DatabaseError, DuplicatedPostUrlExistsError} from "../../services/error/error";
 import {HTMLParseError} from "../../services/dom/error/error";
+import logger from "../../utils/Logger";
 
 export default {
 
@@ -21,7 +22,7 @@ export default {
                 } else if (error instanceof HTMLParseError) {
                     return res.status(500).json({message: error.message});
                 } else {
-                    console.error({
+                    logger.error({
                         Message: "Unexpected Error Occurred While Scoring Dom.",
                         Details: error.message,
                         Date: Date().toString(),

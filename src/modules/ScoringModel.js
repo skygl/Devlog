@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import 'tfjs-node-save';
 import {getDate} from '../utils/Utils';
+import logger from '../utils/Logger';
 
 const SCORE_CLASSES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const SCORE_COUNT = SCORE_CLASSES.length;
@@ -30,22 +31,20 @@ async function predictScore(testDomInfo) {
     const inputData = tf.tensor2d(data, [1, data.length]);
     const prediction = await model.predict(inputData);
 
-    const score = prediction.argMax(-1).dataSync()[0] + 1;
-    console.log("prediction", score);
-
-    return score;
+    return prediction.argMax(-1).dataSync()[0] + 1;
 }
 
 async function loadOrTrainModel(doms) {
     if (!model && fs.existsSync(path.resolve(__dirname, 'model1/model.json'))) {
-        console.log("Load Model 1");
+        logger.info("Found Existed Model");
+        logger.info("Load Model 1");
         tempModel = await tf.loadLayersModel('file://' + __dirname + '/model1/model.json');
     } else {
-        console.log("Train New Model " + (isFirstModel ? "2" : "1"));
+        logger.info("Train New Model " + (isFirstModel ? "2" : "1"));
         const [xTrain, yTrain, xTest, yTest] = tf.tidy(() => getDomData(.2, doms));
 
         tempModel = await trainModel(xTrain, yTrain, xTest, yTest);
-        console.log("New Model " + (isFirstModel ? "2" : "1") + " Training Finished");
+        logger.info("New Model " + (isFirstModel ? "2" : "1") + " Training Finished");
 
         await saveModel(tempModel);
     }
@@ -150,10 +149,10 @@ async function trainModel(xTrain, yTrain, xTest, yTest) {
         validationData: [xTest, yTest],
         callbacks: {
             onTrainBegin: () => {
-                console.log("Training Begins");
+                logger.info("Training Begins");
             },
             onTrainEnd: () => {
-                console.log("Training Ends");
+                logger.info("Training Ends");
             }
         }
     });

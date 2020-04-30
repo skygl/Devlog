@@ -101,7 +101,6 @@ const findDom = async ({scored, fromDate, endDate} = {}) => {
     if (Object.keys(condition.created_at).length === 0) {
         delete condition.created_at;
     }
-    console.log(condition);
     return Dom.find(condition).lean();
 };
 

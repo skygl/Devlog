@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 
+import logger from './utils/Logger';
 import blog from './api/blog/index';
 import dom from './api/dom/index';
 import schedules from "./schedules/schedule";
@@ -27,7 +28,7 @@ export default class Server {
     listen(port) {
         const app = this.app;
         app.listen(port, function () {
-            console.log('Server is Listening to port ', port);
+            logger.info('Server is Listening to port ', port);
         });
     }
 

@@ -1,6 +1,7 @@
 import {DatabaseError} from "../../services/error/error";
 import {DuplicatedBlogUrlExistsError} from "../../services/blog/error/error";
 import BlogService from "../../services/blog/BlogService";
+import logger from "../../utils/Logger";
 
 export default {
 
@@ -18,7 +19,7 @@ export default {
                 } else if (error instanceof DuplicatedBlogUrlExistsError) {
                     return res.status(409).json({message: error.message});
                 } else {
-                    console.error({
+                    logger.error({
                         Message: "Unexpected Error Occurred While Creating Blog.",
                         Details: error.message,
                         Date: Date().toString(),

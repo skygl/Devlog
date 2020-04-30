@@ -1,6 +1,7 @@
 import cheerio from 'cheerio';
 import axios from "axios";
 import {getDate} from "../utils/Utils";
+import logger from "../utils/Logger";
 
 const crawlRss = async (blog) => {
     let promises = [];
@@ -32,7 +33,11 @@ const crawlRss = async (blog) => {
 
     return Promise.all(promises)
         .catch(err => {
-            console.error(err);
+            logger.error({
+                message: "Error Occurs During Crawling Rss",
+                url: blog.url,
+                error: err
+            });
             throw err;
         })
 };
