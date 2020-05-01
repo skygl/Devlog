@@ -1,14 +1,19 @@
 import winston from "winston";
 import path from 'path';
+import moment from "moment";
 import 'winston-daily-rotate-file';
 
 const env = process.env.NODE_ENV || "dev";
 
-const {combine, timestamp, printf} = winston.format;
+const {printf} = winston.format;
 
-const format = printf(({level, message, timestamp}) => {
-    return `${timestamp} ${level}: ${message}`;
+const format = printf(({level, message}) => {
+    return `${tsFormat()} ${level}: ${message}`;
 });
+
+const tsFormat = () => {
+    return moment().format('YYYY-MM-DDT HH:mm:ss:SSS');
+};
 
 const options = {
     file: {
@@ -19,13 +24,13 @@ const options = {
         json: false,
         colorize: false,
         maxFiles: "14d",
-        format: combine(timestamp(), format)
+        format: format
     },
     console: {
         level: 'debug',
         json: false,
         colorize: true,
-        format: combine(timestamp(), format)
+        format: format
     }
 };
 
