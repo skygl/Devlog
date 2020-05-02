@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.8.7",
+    "@slack/events-api": "^2.3.2",
+    "@slack/web-api": "^5.8.1",
     "@tensorflow/tfjs": "^1.7.2",
     "axios": "^0.19.2",
     "cheerio": "^1.0.0-rc.3",
