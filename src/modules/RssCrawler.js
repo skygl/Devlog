@@ -14,8 +14,10 @@ const crawlRss = async (blog) => {
         const published_at = new Date($(this).find("pubDate").text());
         const yesterday = getDate(new Date(), {day: -1, hours: 0, min: 0, sec: 0, ms: 0});
 
-        if (yesterday > published_at || (published_at - yesterday) > 24 * 60 * 60 * 1000) {
+        if (yesterday > published_at) {
             return false;
+        } else if ((published_at - yesterday) > 24 * 60 * 60 * 1000) {
+            return true;
         }
 
         promises.push(new Promise((resolve) => {
