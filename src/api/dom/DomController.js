@@ -1,6 +1,6 @@
 import DomService from "../../services/dom/DomService";
 import {DatabaseError, DuplicatedPostUrlExistsError} from "../../services/error/error";
-import {HTMLParseError, NotExistsUnscoredDomError} from "../../services/dom/error/error";
+import {HTMLParseError, NotExistsDomError, NotExistsUnscoredDomError} from "../../services/dom/error/error";
 import logger from "../../utils/Logger";
 
 export default {
@@ -45,6 +45,30 @@ export default {
                     return res.status(500).json({message: error.message, details: error.error});
                 } else if (error instanceof NotExistsUnscoredDomError) {
                     return res.status(400).json({message: error.message})
+                } else {
+                    logger.error({
+                        Message: "Unexpected Error Occurred While Scoring Dom.",
+                        Details: error.message,
+                        Date: Date().toString(),
+                        Url: req.baseUrl,
+                        Headers: req.headers,
+                        Body: req.body
+                    });
+                    return res.status(500).end();
+                }
+            })
+    },
+
+    async scoreUnscoredDom(req, res) {
+        DomService.scoreUnscoredDom(req.body)
+            .then(dom => {
+                res.status(200).json({url: dom.url, score: dom.score, expected_score: dom.expected_score});
+            })
+            .catch(error => {
+                if (error instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                } else if (error instanceof NotExistsDomError) {
+                    return res.status(400).json({message: error.message, url: error.url});
                 } else {
                     logger.error({
                         Message: "Unexpected Error Occurred While Scoring Dom.",
