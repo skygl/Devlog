@@ -10,6 +10,7 @@ const MONGO_DB_URL = 'mongodb://' + MONGO_DB_HOST + ':' + MONGO_DB_PORT + '/' + 
 mongoose.Promise = global.Promise;
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useUnifiedTopology", true);
+mongoose.set('useFindAndModify', false);
 
 logger.info("Try to Connect to MongoDB Server :" + MONGO_DB_URL);
 mongoose.connect(MONGO_DB_URL)
