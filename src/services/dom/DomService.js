@@ -38,7 +38,7 @@ const scoreUnscoredDom = async (scoreInfo) => {
         throw new NotExistsDomError(url);
     }
 
-    return Dom.findOneAndUpdate({_id: dom._id}, {score: scoreInfo.score})
+    return Dom.findOneAndUpdate({_id: dom._id}, {score: scoreInfo.score}, {new: true})
         .catch(error => {
             throw new DatabaseError(error);
         })
