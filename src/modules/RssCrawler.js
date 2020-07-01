@@ -3,7 +3,7 @@ import axios from "axios";
 import {getDate} from "../utils/Utils";
 import logger from "../utils/Logger";
 
-const crawlRss = async (blog) => {
+const crawlNewPosts = async (blog) => {
     let promises = [];
 
     const feedHtml = await axios.get(blog.feed.url);
@@ -36,9 +36,10 @@ const crawlRss = async (blog) => {
     return Promise.all(promises)
         .catch(err => {
             logger.error({
-                message: "Error Occurs During Crawling Rss",
+                message: "[CR] Error occurs during crawling posts in rss",
                 url: blog.url,
-                error: err
+                error: error.message,
+                stacktrace: error.stack
             });
             throw err;
         })
@@ -61,8 +62,8 @@ class RssCrawler {
     constructor() {
     }
 
-    async crawlRss(doc) {
-        return crawlRss(doc);
+    async crawlNewPosts(doc) {
+        return crawlNewPosts(doc);
     }
 }
 

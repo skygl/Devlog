@@ -41,13 +41,13 @@ const existsUrl = (url) => {
         .then(savedBlog => !!savedBlog);
 };
 
-const getBlogsCursor = () => {
-    return Blog.find().lean().cursor();
+const getBlogs = () => {
+    return Blog.find().lean();
 };
 
 export default {
     saveBlog: saveBlog,
     existsUrl: existsUrl,
     findBlogForPostUrl: findBlogForPostUrl,
-    getBlogsCursor: getBlogsCursor,
+    getBlogs: getBlogs,
 }
