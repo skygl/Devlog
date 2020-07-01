@@ -25,12 +25,12 @@ const crawlNewPosts = async () => {
                     await DomService.createDom(domInfo);
                 })
                 .catch(error => {
-                    logger.error({
+                    logger.error(JSON.stringify({
                         message: "[CR] Error occurs during crawling elements in post",
                         url: post.url,
                         error: error.message,
                         stacktrace: error.stack
-                    });
+                    }));
                 });
         }
     }

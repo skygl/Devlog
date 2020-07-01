@@ -22,12 +22,15 @@ const crawlNewPosts = async (blog) => {
 
         promises.push(new Promise((resolve) => {
             const url = $(this).find("link").text();
-            crawlTags(url, blog.feed.tag)
-                .then(tags => {
+            crawlDescs(url, blog.feed.tag)
+                .then(descs => {
                     resolve({
                         url: url,
                         published_at: published_at,
-                        tags: tags,
+                        tags: descs.tags,
+                        title: descs.title,
+                        description: descs.description,
+                        imageUrl: descs.imageUrl
                     });
                 });
         }));
@@ -35,27 +38,69 @@ const crawlNewPosts = async (blog) => {
 
     return Promise.all(promises)
         .catch(err => {
-            logger.error({
+            logger.error(JSON.stringify({
                 message: "[CR] Error occurs during crawling posts in rss",
                 url: blog.url,
                 error: error.message,
                 stacktrace: error.stack
-            });
+            }));
             throw err;
         })
 };
 
-const crawlTags = async (url, tagDom) => {
+const parseImage = ($) => {
+    let element;
+    if ((element = $("meta[property='og:image']")).length > 0) {
+        return element.attr("content");
+    }
+    return "/devlog.png";
+};
+
+const parseTitle = ($) => {
+    let element;
+    if ((element = $("meta[property='og:title']")).length > 0
+        || (element = $("meta[name='title']")).length > 0) {
+        return element.attr("content");
+    } else if ((element = $("head > title")).length > 0) {
+        return element.text();
+    } else {
+        return "";
+    }
+};
+
+const parseDescription = ($) => {
+    let element;
+    if ((element = $("meta[property='og:description']")).length > 0
+        || (element = $("meta[name='description']")).length > 0) {
+        return element.attr("content");
+    } else if ((element = $("head > description")).length > 0) {
+        return element.text();
+    } else {
+        return "";
+    }
+};
+
+const crawlDescs = async (url, tagDom) => {
     let tags = [];
 
     const html = await axios.get(url);
 
     let $ = cheerio.load(html.data);
+
+    const title = parseTitle($);
+    const imageUrl = parseImage($);
+    const description = parseDescription($);
+
     $(tagDom).each((i, elem) => {
         tags[i] = $(elem).text().trim();
     });
 
-    return tags;
+    return {
+        tags,
+        title,
+        imageUrl,
+        description
+    };
 };
 
 class RssCrawler {
