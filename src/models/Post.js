@@ -7,7 +7,8 @@ const PostSchema = new mongoose.Schema({
     description: String,
     imageUrl: String,
     score: Number,
-    published_at: Date
+    published_at: Date,
+    created_at: Date
 });
 
 module.exports = mongoose.model('Post', PostSchema);

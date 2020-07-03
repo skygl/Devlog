@@ -18,6 +18,7 @@ const savePost = async (postInfo) => {
     post.tags = postInfo.tags;
     post.score = postInfo.score;
     post.published_at = postInfo.published_at;
+    post.created_at = new Date();
 
     return post.save()
         .catch(error => {
@@ -33,16 +34,6 @@ const existsPostUrl = async (url) => {
         .then(savedPost => !!savedPost);
 };
 
-const findByTag = async (tagInfo) => {
-    return Post.find({tags: {$in: tagInfo.tag}})
-        .sort({score: -1})
-        .skip(5 * (tagInfo["page"] - 1))
-        .limit(5)
-        .catch(error => {
-            throw new DatabaseError(error);
-        })
-};
-
 const findTop5PostsPublishedYesterday = async () => {
     let gte_date = getDate(new Date(), {day: -1, hours: 0, min: 0, sec: 0, ms: 0});
     let lt_date = getDate(new Date(), {day: 0, hours: 0, min: 0, set: 0, ms: 0});
@@ -56,6 +47,5 @@ const findTop5PostsPublishedYesterday = async () => {
 
 export default {
     savePost: savePost,
-    findByTag: findByTag,
     findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
 }
