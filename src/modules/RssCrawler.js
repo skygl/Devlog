@@ -80,7 +80,7 @@ const parseDescription = ($) => {
     }
 };
 
-const crawlDescs = async (url, tagDom) => {
+const crawlDescs = async (url, tagSelector) => {
     let tags = [];
 
     const html = await axios.get(url);
@@ -91,7 +91,7 @@ const crawlDescs = async (url, tagDom) => {
     const imageUrl = parseImage($);
     const description = parseDescription($);
 
-    $(tagDom).each((i, elem) => {
+    $(tagSelector).each((i, elem) => {
         tags[i] = $(elem).text().trim();
     });
 
