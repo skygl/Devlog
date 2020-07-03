@@ -107,8 +107,8 @@ class RssCrawler {
     constructor() {
     }
 
-    async crawlNewPosts(doc) {
-        return crawlNewPosts(doc);
+    async crawlNewPosts(blog) {
+        return crawlNewPosts(blog);
     }
 }
 

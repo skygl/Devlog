@@ -1,6 +1,6 @@
 import Blog from '../../models/Blog';
 import {DatabaseError} from "../error/error";
-import {DuplicatedBlogUrlExistsError, NotExistsHandleableBlogError} from "./error/error";
+import {DuplicatedBlogUrlExistsError} from "./error/error";
 import '@babel/polyfill';
 
 const saveBlog = async (blogInfo) => {
@@ -22,17 +22,6 @@ const saveBlog = async (blogInfo) => {
         });
 };
 
-const findBlogForPostUrl = async (postUrl) => {
-    const savedBlog = await Blog.findOne({$where: "this.post_regex && RegExp(this.post_regex).test(\"" + postUrl + "\")"})
-        .catch(err => {
-            throw new DatabaseError(err);
-        });
-    if (!savedBlog) {
-        throw new NotExistsHandleableBlogError();
-    }
-    return savedBlog;
-};
-
 const existsUrl = (url) => {
     return Blog.findOne({url: url})
         .catch(err => {
@@ -48,6 +37,5 @@ const getBlogs = () => {
 export default {
     saveBlog: saveBlog,
     existsUrl: existsUrl,
-    findBlogForPostUrl: findBlogForPostUrl,
     getBlogs: getBlogs,
 }
