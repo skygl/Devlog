@@ -69,10 +69,38 @@ const getOne = ({id}) => {
         })
 };
 
+const update = ({data}) => {
+    return Blog.findOneAndUpdate({_id: data._id},
+        {
+            $set: {
+                'elements.from': data.elements.from,
+                'elements.remove': data.elements.remove,
+                'feed.url': data.feed.url,
+                'feed.tag': data.feed.tag,
+                url: data.url,
+                post_regex: data.post_regex,
+                updated_at: new Date()
+            }
+        }, {new: true})
+        .then(updatedBlog => {
+            const oldBlog = {...data};
+            delete oldBlog.id;
+            return {
+                id: data._id,
+                previousData: oldBlog,
+                data: updatedBlog
+            }
+        })
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     saveBlog: saveBlog,
     existsUrl: existsUrl,
     getBlogs: getBlogs,
     getList: getList,
     getOne: getOne,
+    update: update,
 }

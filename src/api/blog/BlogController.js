@@ -66,7 +66,6 @@ export default {
     async getOne(req, res) {
         BlogService.getOne({id: req.params.id})
             .then(blog => {
-                console.log(blog);
                 res.json({data: {...blog, id: blog._id}});
             })
             .catch(err => {
@@ -75,6 +74,27 @@ export default {
                 }
                 logger.error(JSON.stringify({
                     Message: "Unexpected Error Occurred While Reading Blog.",
+                    Details: error.message,
+                    Date: Date().toString(),
+                    Url: req.baseUrl,
+                    Headers: req.headers,
+                    Body: req.body
+                }));
+                return res.status(500).end();
+            })
+    },
+
+    async update(req, res) {
+        BlogService.update({data: req.body})
+            .then(result => {
+                return {...result}
+            })
+            .catch(err => {
+                if (err instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                }
+                logger.error(JSON.stringify({
+                    Message: "Unexpected Error Occurred While Updating Blog.",
                     Details: error.message,
                     Date: Date().toString(),
                     Url: req.baseUrl,
