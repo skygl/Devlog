@@ -62,9 +62,17 @@ const getList = ({_start, _end, _order, _sort}) => {
         })
 };
 
+const getOne = ({id}) => {
+    return Blog.findOne({_id: id})
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     saveBlog: saveBlog,
     existsUrl: existsUrl,
     getBlogs: getBlogs,
     getList: getList,
+    getOne: getOne,
 }
