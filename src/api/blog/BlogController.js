@@ -7,11 +7,8 @@ export default {
 
     async createBlog(req, res) {
         BlogService.saveBlog(req.body)
-            .then(() => {
-                res.json({
-                    success: true,
-                    message: 'Blog is Created.'
-                });
+            .then((blog) => {
+                res.json({...blog, id: blog._id});
             })
             .catch(error => {
                 if (error instanceof DatabaseError) {
@@ -66,7 +63,7 @@ export default {
     async getOne(req, res) {
         BlogService.getOne({id: req.params.id})
             .then(blog => {
-                res.json({data: {...blog, id: blog._id}});
+                res.json({...blog, id: blog._id});
             })
             .catch(err => {
                 if (err instanceof DatabaseError) {

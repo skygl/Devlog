@@ -17,6 +17,7 @@ const saveBlog = async (blogInfo) => {
     blog.updated_at = new Date();
 
     return blog.save()
+        .then(blog => blog.toObject())
         .catch(err => {
             throw new DatabaseError(err);
         });
@@ -64,6 +65,7 @@ const getList = ({_start, _end, _order, _sort}) => {
 
 const getOne = ({id}) => {
     return Blog.findOne({_id: id})
+        .then(blog => blog.toObject())
         .catch(err => {
             throw new DatabaseError(err);
         })
