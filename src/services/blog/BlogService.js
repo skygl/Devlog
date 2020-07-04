@@ -35,23 +35,30 @@ const getBlogs = () => {
     return Blog.find().lean();
 };
 
-const getList = ({_start, _end, _order, _sort}) => {
+const getList = ({_start, _end, _order, _sort, url}) => {
     const [skip, limit] = [_start, _end - _start];
 
-    return Blog.aggregate([
-        {
-            $facet: {
-                data: [
-                    {"$sort": {[_sort === 'id' ? '_id' : _sort]: _order === 'ASC' ? 1 : -1}},
-                    {"$skip": skip},
-                    {"$limit": limit}
-                ],
-                count: [
-                    {$count: "count"}
-                ]
-            }
+    const pipeline = [];
+
+    if (url) {
+        pipeline.push({
+            $match: {url: {$regex: `/.*${url}.*/`}}
+        })
+    }
+    pipeline.push({
+        $facet: {
+            data: [
+                {"$sort": {[_sort === 'id' ? '_id' : _sort]: _order === 'ASC' ? 1 : -1}},
+                {"$skip": skip},
+                {"$limit": limit}
+            ],
+            count: [
+                {$count: "count"}
+            ]
         }
-    ])
+    });
+
+    return Blog.aggregate(pipeline)
         .then(result => {
             return {
                 data: result[0].data,
