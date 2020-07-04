@@ -3,6 +3,7 @@ import cors from 'cors';
 
 import logger from './utils/Logger';
 import blog from './api/blog/index';
+import blogreq from "./api/blogreq";
 import schedules from "./schedules/schedule";
 import cron from 'node-cron';
 
@@ -21,6 +22,7 @@ export default class Server {
             limit: "50mb"
         }));
         app.use('/blogs', blog);
+        app.use('/blogreqs', blogreq);
     }
 
     listen(port) {

@@ -29,13 +29,14 @@ const createBlogReq = async (blogInfo) => {
     blogReq.updated_at = new Date();
 
     return blogReq.save()
+        .then(blogReq => blogReq.toObject())
         .catch(err => {
             throw new DatabaseError(err);
         })
 };
 
 const existsUrl = async (url) => {
-    return BlogReq.findOne({url: url})
+    return BlogReq.findOne({url: url, status: {$ne: DENIED}})
         .catch(error => {
             throw new DatabaseError(error);
         })
