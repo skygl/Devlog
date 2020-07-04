@@ -57,5 +57,26 @@ export default {
                 }));
                 return res.status(500).end();
             })
+    },
+
+    async getOne(req, res) {
+        BlogReqService.getOne({id: req.params.id})
+            .then(blogReq => {
+                res.json({...blogReq, id: blogReq._id})
+            })
+            .catch(err => {
+                if (err instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                }
+                logger.error(JSON.stringify({
+                    Message: "Unexpected Error Occurred While Reading BlogRequest.",
+                    Details: error.message,
+                    Date: Date().toString(),
+                    Url: req.baseUrl,
+                    Headers: req.headers,
+                    Body: req.body
+                }));
+                return res.status(500).end();
+            })
     }
 }

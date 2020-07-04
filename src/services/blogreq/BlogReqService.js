@@ -72,7 +72,16 @@ const getList = async ({_start, _end, _order, _sort}) => {
         })
 };
 
+const getOne = async ({id}) => {
+    return BlogReq.findOne({_id: id})
+        .then(blogReq => blogReq.toObject())
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     createBlogReq: createBlogReq,
-    getList: getList
+    getList: getList,
+    getOne: getOne,
 }
