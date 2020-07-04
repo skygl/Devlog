@@ -100,5 +100,26 @@ export default {
                 }));
                 return res.status(500).end();
             })
+    },
+
+    async delete(req, res) {
+        BlogService.delete({id: req.params.id})
+            .then(deletedBlog => {
+                res.json(deletedBlog);
+            })
+            .catch(err => {
+                if (err instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                }
+                logger.error(JSON.stringify({
+                    Message: "Unexpected Error Occurred While Deleting Blog.",
+                    Details: error.message,
+                    Date: Date().toString(),
+                    Url: req.baseUrl,
+                    Headers: req.headers,
+                    Body: req.body
+                }));
+                return res.status(500).end();
+            })
     }
 }

@@ -98,6 +98,14 @@ const update = ({data}) => {
         })
 };
 
+const deleteBlog = ({id}) => {
+    return Blog.findOneAndDelete({_id: id})
+        .then(deletedBlog => deletedBlog.toObject())
+        .catch(err => {
+            throw new DatabaseError(err);
+        });
+};
+
 export default {
     saveBlog: saveBlog,
     existsUrl: existsUrl,
@@ -105,4 +113,5 @@ export default {
     getList: getList,
     getOne: getOne,
     update: update,
+    delete: deleteBlog,
 }

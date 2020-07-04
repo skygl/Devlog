@@ -7,5 +7,6 @@ blog.post('/', BlogController.createBlog);
 blog.get('/', BlogController.getList);
 blog.get('/:id', BlogController.getOne);
 blog.put('/:id', BlogController.update);
+blog.delete('/:id', BlogController.delete);
 
 export default blog;
