@@ -2,6 +2,7 @@ import BlogReqService from "../../services/blogreq/BlogReqService";
 import {DatabaseError} from "../../services/error/error";
 import {ExistsUrlError} from "../../services/blogreq/error/error";
 import logger from "../../utils/Logger";
+import {DuplicatedBlogUrlExistsError} from "../../services/blog/error/error";
 
 export default {
 
@@ -70,6 +71,29 @@ export default {
                 }
                 logger.error(JSON.stringify({
                     Message: "Unexpected Error Occurred While Reading BlogRequest.",
+                    Details: error.message,
+                    Date: Date().toString(),
+                    Url: req.baseUrl,
+                    Headers: req.headers,
+                    Body: req.body
+                }));
+                return res.status(500).end();
+            })
+    },
+
+    async update(req, res) {
+        BlogReqService.update({data: req.body})
+            .then(result => {
+                return res.json({...result})
+            })
+            .catch(error => {
+                if (error instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                } else if (error instanceof DuplicatedBlogUrlExistsError) {
+                    return res.status(409).json({message: error.message});
+                }
+                logger.error(JSON.stringify({
+                    Message: "Unexpected Error Occurred While Updating BlogReq.",
                     Details: error.message,
                     Date: Date().toString(),
                     Url: req.baseUrl,

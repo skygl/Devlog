@@ -80,8 +80,59 @@ const getOne = async ({id}) => {
         })
 };
 
+const update = async ({data}) => {
+    const updatedTime = new Date();
+    return BlogReq.findOneAndUpdate({_id: data._id},
+        {
+            $set: {
+                url: data.url,
+                status: data.status,
+                reason: data.reason,
+                updated_at: updatedTime,
+            }
+        })
+        .then(oldBlogReq => {
+            const newBlogReq = {
+                _id: data._id,
+                url: data.url,
+                status: data.status,
+                reason: data.reason,
+                created_at: oldBlogReq.created_at,
+                updated_at: updatedTime
+            };
+            return {
+                id: data._id,
+                previousData: oldBlogReq,
+                data: newBlogReq
+            }
+        })
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+        .then(res => {
+            if (res.data.status !== REGISTERED) {
+                return res;
+            }
+            const blogInfo = {
+                url: data.url,
+                post_regex: data.post_regex,
+                feed: {
+                    tag: data.feed.tag,
+                    url: data.feed.url,
+                },
+                elements: {
+                    from: data.elements.from,
+                    remove: data.elements.remove,
+                },
+            };
+            return BlogService.saveBlog(blogInfo)
+                .then(() => res);
+        })
+};
+
 export default {
     createBlogReq: createBlogReq,
     getList: getList,
     getOne: getOne,
+    update: update,
 }
