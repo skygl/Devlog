@@ -44,8 +44,8 @@ export default {
                     return record;
                 }))
             })
-            .catch(err => {
-                if (err instanceof DatabaseError) {
+            .catch(error => {
+                if (error instanceof DatabaseError) {
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({
@@ -65,8 +65,8 @@ export default {
             .then(blogReq => {
                 res.json({...blogReq, id: blogReq._id})
             })
-            .catch(err => {
-                if (err instanceof DatabaseError) {
+            .catch(error => {
+                if (error instanceof DatabaseError) {
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({

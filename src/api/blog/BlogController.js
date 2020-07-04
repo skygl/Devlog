@@ -45,8 +45,8 @@ export default {
                     return record;
                 }))
             })
-            .catch(err => {
-                if (err instanceof DatabaseError) {
+            .catch(error => {
+                if (error instanceof DatabaseError) {
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({
@@ -66,8 +66,8 @@ export default {
             .then(blog => {
                 res.json({...blog, id: blog._id});
             })
-            .catch(err => {
-                if (err instanceof DatabaseError) {
+            .catch(error => {
+                if (error instanceof DatabaseError) {
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({
@@ -87,8 +87,8 @@ export default {
             .then(result => {
                 return {...result}
             })
-            .catch(err => {
-                if (err instanceof DatabaseError) {
+            .catch(error => {
+                if (error instanceof DatabaseError) {
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({
@@ -108,8 +108,8 @@ export default {
             .then(deletedBlog => {
                 res.json(deletedBlog);
             })
-            .catch(err => {
-                if (err instanceof DatabaseError) {
+            .catch(error => {
+                if (error instanceof DatabaseError) {
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({
