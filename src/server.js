@@ -16,7 +16,7 @@ export default class Server {
 
     route() {
         const app = this.app;
-        app.use(cors());
+        app.use(cors({exposedHeaders: "X-Total-Count"}));
         app.use(express.json({
             limit: "50mb"
         }));
