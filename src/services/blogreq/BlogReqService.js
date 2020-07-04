@@ -130,9 +130,18 @@ const update = async ({data}) => {
         })
 };
 
+const deleteBlogReq = ({id}) => {
+    return BlogReq.findOneAndDelete({_id: id})
+        .then(deletedBlogReq => deletedBlogReq.toObject())
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     createBlogReq: createBlogReq,
     getList: getList,
     getOne: getOne,
     update: update,
+    delete: deleteBlogReq,
 }
