@@ -43,6 +43,36 @@ const existsUrl = async (url) => {
         .then(savedBlogReq => !!savedBlogReq);
 };
 
+const getList = async ({_start, _end, _order, _sort}) => {
+    const [skip, limit] = [_start, _end - _start];
+
+    const pipeline = [];
+    pipeline.push({
+        $facet: {
+            data: [
+                {"$sort": {[_sort === 'id' ? '_id' : _sort]: _order === 'ASC' ? 1 : -1}},
+                {"$skip": skip},
+                {"$limit": limit}
+            ],
+            count: [
+                {$count: "count"}
+            ]
+        }
+    });
+
+    return BlogReq.aggregate(pipeline)
+        .then(result => {
+            return {
+                data: result[0].data,
+                count: result[0].count[0].count
+            }
+        })
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     createBlogReq: createBlogReq,
+    getList: getList
 }
