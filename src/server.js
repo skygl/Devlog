@@ -7,6 +7,7 @@ import blogreq from "./api/blogreq";
 import schedules from "./schedules/schedule";
 import cron from 'node-cron';
 import post from "./api/post";
+import auth from "./api/auth";
 
 export default class Server {
 
@@ -25,6 +26,7 @@ export default class Server {
         app.use('/blogs', blog);
         app.use('/blogreqs', blogreq);
         app.use('/posts', post);
+        app.use('/', auth);
     }
 
     listen(port) {
