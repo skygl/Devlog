@@ -9,7 +9,12 @@ export default {
             sort: req.query._sort,
             start: parseInt(req.query._start),
             end: parseInt(req.query._end),
-            order: req.query._order
+            order: req.query._order,
+            url: req.query.url,
+            score: req.query.score,
+            start_date: req.query.start_date,
+            end_date: req.query.end_date,
+            unscored: req.query.unscored,
         })
             .then(result => {
                 res.set('X-Total-Count', result.count);
@@ -20,6 +25,7 @@ export default {
             })
             .catch(error => {
                 if (error instanceof DatabaseError) {
+                    console.log(error.error.message)
                     return res.status(500).json({message: error.message, details: error.error});
                 }
                 logger.error(JSON.stringify({

@@ -1,6 +1,7 @@
 import Post from '../../models/Post';
 import {getDate} from '../../utils/Utils';
 import '@babel/polyfill';
+import rangeParser from "parse-numeric-range";
 import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
 
 const savePost = async (postInfo) => {
@@ -45,10 +46,34 @@ const findTop5PostsPublishedYesterday = async () => {
         })
 };
 
-const getList = async ({start, end, order, sort}) => {
+const getList = async ({start, end, order, sort, url, score, start_date, end_date, unscored}) => {
     const [skip, limit] = [start, end - start];
 
     const pipeline = [];
+    if (url || score || start_date || end_date || unscored) {
+        const match = {$match: {}};
+        if (url) {
+            match.$match.url = {$regex: `.*${url}.*`};
+        }
+        if (score) {
+            match.$match.score = {$in: rangeParser(score)};
+        }
+        if (start_date || end_date) {
+            match.$match.published_at = {};
+            if (start_date) {
+                match.$match.published_at.$gte = new Date(new Date(start_date).setHours(0, 0, 0, 0));
+            }
+            if (end_date) {
+                match.$match.published_at.$lte = new Date(new Date(end_date).setHours(23, 59, 59, 999));
+            }
+        }
+        if (unscored === 'true') {
+            match.$match.score = null;
+        } else if (unscored === 'false') {
+            match.$match.score = {$ne: null}
+        }
+        pipeline.push(match);
+    }
 
     pipeline.push({
         $facet: {
