@@ -89,9 +89,30 @@ const getOne = async ({id}) => {
         })
 };
 
+const update = async ({id, score}) => {
+    return Post.findOneAndUpdate({_id: id},
+        {
+            $set: {
+                score: score
+            }
+        })
+        .then(async (oldPost) => {
+            const newPost = await Post.findOne({_id: id});
+            return {
+                id: id,
+                previousData: oldPost,
+                data: newPost
+            }
+        })
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     savePost: savePost,
     findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
     getList: getList,
     getOne: getOne,
+    update: update,
 }

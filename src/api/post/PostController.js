@@ -53,5 +53,26 @@ export default {
                 }));
                 return res.status(500).end();
             })
+    },
+
+    async update(req, res) {
+        PostService.update({id: req.body.id, score: req.body.score})
+            .then(result => {
+                return {...result};
+            })
+            .catch(error => {
+                if (error instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                }
+                logger.error(JSON.stringify({
+                    Message: "Unexpected Error Occurred While Updating Post.",
+                    Details: error.message,
+                    Date: Date().toString(),
+                    Url: req.baseUrl,
+                    Headers: req.headers,
+                    Body: req.body
+                }));
+                return res.status(500).end();
+            })
     }
 }
