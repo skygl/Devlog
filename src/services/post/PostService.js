@@ -81,8 +81,17 @@ const getList = async ({start, end, order, sort}) => {
         })
 };
 
+const getOne = async ({id}) => {
+    return Post.findOne({_id: id})
+        .then(post => post.toObject())
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     savePost: savePost,
     findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
     getList: getList,
+    getOne: getOne,
 }

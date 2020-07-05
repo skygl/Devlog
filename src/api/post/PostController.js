@@ -32,5 +32,26 @@ export default {
                 }));
                 return res.status(500).end();
             })
+    },
+
+    async getOne(req, res) {
+        PostService.getOne({id: req.params.id})
+            .then(post => {
+                res.json({...post, id: post._id})
+            })
+            .catch(error => {
+                if (error instanceof DatabaseError) {
+                    return res.status(500).json({message: error.message, details: error.error});
+                }
+                logger.error(JSON.stringify({
+                    Message: "Unexpected Error Occurred While Reading Post.",
+                    Details: error.message,
+                    Date: Date().toString(),
+                    Url: req.baseUrl,
+                    Headers: req.headers,
+                    Body: req.body
+                }));
+                return res.status(500).end();
+            })
     }
 }
