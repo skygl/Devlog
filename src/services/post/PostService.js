@@ -45,7 +45,44 @@ const findTop5PostsPublishedYesterday = async () => {
         })
 };
 
+const getList = async ({start, end, order, sort}) => {
+    const [skip, limit] = [start, end - start];
+
+    const pipeline = [];
+
+    pipeline.push({
+        $facet: {
+            data: [
+                {"$sort": {[sort === 'id' ? '_id' : sort]: order === 'ASC' ? 1 : -1}},
+                {"$skip": skip},
+                {"$limit": limit}
+            ],
+            count: [
+                {$count: "count"}
+            ]
+        }
+    });
+
+    return Post.aggregate(pipeline)
+        .then(result => {
+            return {
+                data: result[0].data,
+                count: result[0].count[0].count
+            }
+        })
+        .catch(err => {
+            if (err.message === `Cannot read property 'count' of undefined`) {
+                return {
+                    data: [],
+                    count: 0
+                }
+            }
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     savePost: savePost,
     findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
+    getList: getList,
 }
