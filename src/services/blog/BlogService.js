@@ -42,7 +42,7 @@ const getList = ({_start, _end, _order, _sort, url}) => {
 
     if (url) {
         pipeline.push({
-            $match: {url: {$regex: `/.*${url}.*/`}}
+            $match: {url: {$regex: `.*${url}.*`}}
         })
     }
     pipeline.push({
