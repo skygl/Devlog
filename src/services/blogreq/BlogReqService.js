@@ -43,10 +43,21 @@ const existsUrl = async (url) => {
         .then(savedBlogReq => !!savedBlogReq);
 };
 
-const getList = async ({_start, _end, _order, _sort}) => {
+const getList = async ({_start, _end, _order, _sort, url, status}) => {
     const [skip, limit] = [_start, _end - _start];
 
     const pipeline = [];
+
+    if (url || status) {
+        const match = {$match: {}};
+        if (url) {
+            match.$match.url = {$regex: `.*${url}.*`};
+        }
+        if (status) {
+            match.$match.status = status;
+        }
+        pipeline.push(match);
+    }
     pipeline.push({
         $facet: {
             data: [
@@ -68,6 +79,12 @@ const getList = async ({_start, _end, _order, _sort}) => {
             }
         })
         .catch(err => {
+            if (err.message === `Cannot read property 'count' of undefined`) {
+                return {
+                    data: [],
+                    count: 0
+                }
+            }
             throw new DatabaseError(err);
         })
 };

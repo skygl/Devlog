@@ -35,7 +35,9 @@ export default {
             _sort: req.query._sort,
             _start: parseInt(req.query._start),
             _end: parseInt(req.query._end),
-            _order: req.query._order
+            _order: req.query._order,
+            url: req.query.url,
+            status: req.query.status
         })
             .then(result => {
                 res.set('X-Total-Count', result.count);
