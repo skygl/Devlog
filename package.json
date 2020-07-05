@@ -24,6 +24,7 @@
     "mongoose": "^5.9.7",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0",
+    "parse-numeric-range": "^1.2.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.2"
   },
