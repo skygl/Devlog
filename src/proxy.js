@@ -6,6 +6,9 @@ const proxy = (req, res) => {
         .then(response => {
             res.status(response.status).send(response.data);
         })
+        .catch(error => {
+            res.status(error.response.status).end();
+        })
 };
 
 export default proxy;
