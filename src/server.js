@@ -10,6 +10,7 @@ import post from "./api/post";
 import auth from "./api/auth";
 import {authorizeAdmin} from "./commons/auth";
 import proxy from "./proxy";
+import api from "./api";
 
 export default class Server {
 
@@ -31,6 +32,7 @@ export default class Server {
         app.use('/blogreqs', blogreq);
         app.use('/posts', post);
         app.use('/', auth);
+        app.use('/api', api);
     }
 
     listen(port) {
