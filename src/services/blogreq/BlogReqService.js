@@ -12,14 +12,9 @@ const REGISTERED = "Registered";
 const createBlogReq = async (blogInfo) => {
     let url = blogInfo.url;
 
-    let existsBlogUrl = await BlogService.existsUrl(url);
-    if (existsBlogUrl) {
-        throw new ExistsUrlError("There is a Existed Blog Having Request Url.", url);
-    }
-
-    let existsBlogReqUrl = await existsUrl(url);
-    if (existsBlogReqUrl) {
-        throw new ExistsUrlError("There is a Existed BlogRequest Having Request Url.", url)
+    const exists = await existsUrl(url);
+    if (exists.exists) {
+        throw new ExistsUrlError(exists.message, url, exists.type)
     }
 
     let blogReq = new BlogReq();
@@ -36,11 +31,30 @@ const createBlogReq = async (blogInfo) => {
 };
 
 const existsUrl = async (url) => {
-    return BlogReq.findOne({url: url, status: {$ne: DENIED}})
+    let existsBlogUrl = await BlogService.existsUrl(url);
+    if (existsBlogUrl) {
+        return {
+            exists: true,
+            message: "There is a Existed Blog Having Request Url.",
+            type: 'blog'
+        };
+    }
+
+    let existsBlogReqUrl = await BlogReq.findOne({url: url, status: {$ne: DENIED}})
         .catch(error => {
             throw new DatabaseError(error);
         })
         .then(savedBlogReq => !!savedBlogReq);
+    if (existsBlogReqUrl) {
+        return {
+            exists: true,
+            message: "There is a Existed BlogRequest Having Request Url.",
+            type: 'blogreq'
+        };
+    }
+    return {
+        exists: false
+    }
 };
 
 const getList = async ({_start, _end, _order, _sort, url, status}) => {
@@ -161,4 +175,5 @@ export default {
     getOne: getOne,
     update: update,
     delete: deleteBlogReq,
+    existsUrl: existsUrl
 }

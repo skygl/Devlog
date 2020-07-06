@@ -122,26 +122,5 @@ export default {
                 }));
                 return res.status(500).end();
             })
-    },
-
-    async exists(req, res) {
-        BlogService.existsUrl(req.query.url)
-            .then(exist => {
-                res.status(200).json({exists: exist})
-            })
-            .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Checking Url Existence",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
-            })
     }
 }
