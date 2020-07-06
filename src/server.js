@@ -9,6 +9,7 @@ import cron from 'node-cron';
 import post from "./api/post";
 import auth from "./api/auth";
 import {authorizeAdmin} from "./commons/auth";
+import proxy from "./proxy";
 
 export default class Server {
 
@@ -24,7 +25,8 @@ export default class Server {
         app.use(express.json({
             limit: "50mb"
         }));
-        app.use(['/blogs', '/blogs/:id', '/posts', '/posts:id', '/blogreqs', '/blogreqs:id'], authorizeAdmin);
+        app.use('/proxy', proxy);
+        app.use(['/blogs', '/blogs/:id', '/posts:id', '/blogreqs', '/blogreqs:id'], authorizeAdmin);
         app.use('/blogs', blog);
         app.use('/blogreqs', blogreq);
         app.use('/posts', post);
