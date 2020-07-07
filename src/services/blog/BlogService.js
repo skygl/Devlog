@@ -10,9 +10,9 @@ const saveBlog = async (blogInfo) => {
     }
 
     let blog = new Blog();
-    Object.keys(blogInfo).forEach(key => {
-        blog[key] = blogInfo[key];
-    });
+    blog.url = blogInfo.url;
+    blog.feed.url = blogInfo.feed.url;
+    blog.feed.tag = blogInfo.feed.tag;
     blog.created_at = new Date();
     blog.updated_at = new Date();
 
@@ -82,12 +82,9 @@ const update = ({data}) => {
     return Blog.findOneAndUpdate({_id: data._id},
         {
             $set: {
-                'elements.from': data.elements.from,
-                'elements.remove': data.elements.remove,
                 'feed.url': data.feed.url,
                 'feed.tag': data.feed.tag,
                 url: data.url,
-                post_regex: data.post_regex,
                 updated_at: new Date()
             }
         }, {new: true})

@@ -31,9 +31,6 @@ blogreq.put('/:id', [
     param('id').isMongoId().withMessage('must be mongoId'),
     body('url').isURL({protocols: ['http', 'https']}).withMessage('must be url'),
     body('status').isIn(STATUSES).withMessage('must be in "Unhandled", "Denied", "Suspended", "Registered"'),
-    body(['post_regex', 'elements.from']).optional()
-        .if(body('status').equals('Registered'))
-        .not().isEmpty().withMessage('must not be empty string'),
     body('feed.url').optional()
         .if(body('status').equals("Registered"))
         .isURL({protocols: ['http', 'https']}).withMessage('must be url'),

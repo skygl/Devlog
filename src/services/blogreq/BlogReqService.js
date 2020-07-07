@@ -146,14 +146,9 @@ const update = async ({data}) => {
             }
             const blogInfo = {
                 url: data.url,
-                post_regex: data.post_regex,
                 feed: {
                     tag: data.feed.tag,
                     url: data.feed.url,
-                },
-                elements: {
-                    from: data.elements.from,
-                    remove: data.elements.remove,
                 },
             };
             return BlogService.saveBlog(blogInfo)

@@ -7,7 +7,6 @@ const blog = express.Router();
 
 blog.post('/', [
     body(['url', 'feed.url']).isURL({protocols: ['http', 'https']}).withMessage('must be url'),
-    body(['elements.from', 'post_regex']).not().isEmpty().withMessage('must not be empty string'),
 ], validate, BlogController.createBlog);
 
 blog.get('/', [
@@ -26,7 +25,6 @@ blog.get('/:id', [
 
 blog.put('/:id', [
     body('_id').isMongoId().withMessage('must be mongoId'),
-    body(['elements.from', 'post_regex']).not().isEmpty().withMessage('must not be empty string'),
     body(['feed.url', 'url']).isURL({protocols: ['http', 'https']}).withMessage('must be url'),
 ], validate, BlogController.update);
 

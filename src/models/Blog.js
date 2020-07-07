@@ -2,11 +2,6 @@ import mongoose from 'mongoose';
 
 const BlogSchema = new mongoose.Schema({
     url: String,
-    post_regex: String,
-    elements: {
-        from: String,
-        remove: String
-    },
     feed: {
         url: String,
         tag: String
