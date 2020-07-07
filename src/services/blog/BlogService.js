@@ -10,7 +10,7 @@ const saveBlog = async (blogInfo) => {
     }
 
     let blog = new Blog();
-    blog.url = blogInfo.url;
+    blog.url = blogInfo.url.replace(/[/]+$/, "");
     blog.feed.url = blogInfo.feed.url;
     blog.feed.tag = blogInfo.feed.tag;
     blog.created_at = new Date();
@@ -24,7 +24,7 @@ const saveBlog = async (blogInfo) => {
 };
 
 const existsUrl = (url) => {
-    return Blog.findOne({url: url})
+    return Blog.findOne({url: url.replace(/[/]+$/, "")})
         .catch(err => {
             throw new DatabaseError(err);
         })
@@ -84,7 +84,7 @@ const update = ({data}) => {
             $set: {
                 'feed.url': data.feed.url,
                 'feed.tag': data.feed.tag,
-                url: data.url,
+                url: data.url.replace(/[/]+$/, ""),
                 updated_at: new Date()
             }
         }, {new: true})

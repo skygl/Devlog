@@ -10,7 +10,7 @@ const SUSPENDED = "Suspended";
 const REGISTERED = "Registered";
 
 const createBlogReq = async (blogInfo) => {
-    let url = blogInfo.url;
+    let url = blogInfo.url.replace(/[/]+$/, "");
 
     const exists = await existsUrl(url);
     if (exists.exists) {
@@ -31,7 +31,7 @@ const createBlogReq = async (blogInfo) => {
 };
 
 const existsUrl = async (url) => {
-    let existsBlogUrl = await BlogService.existsUrl(url);
+    let existsBlogUrl = await BlogService.existsUrl(url.replace(/[/]+$/, ""));
     if (existsBlogUrl) {
         return {
             exists: true,
@@ -40,7 +40,7 @@ const existsUrl = async (url) => {
         };
     }
 
-    let existsBlogReqUrl = await BlogReq.findOne({url: url, status: {$ne: DENIED}})
+    let existsBlogReqUrl = await BlogReq.findOne({url: url.replace(/[/]+$/, ""), status: {$ne: DENIED}})
         .catch(error => {
             throw new DatabaseError(error);
         })
@@ -116,7 +116,7 @@ const update = async ({data}) => {
     return BlogReq.findOneAndUpdate({_id: data._id},
         {
             $set: {
-                url: data.url,
+                url: data.url.replace(/[/]+$/, ""),
                 status: data.status,
                 reason: data.reason,
                 updated_at: updatedTime,
@@ -125,7 +125,7 @@ const update = async ({data}) => {
         .then(oldBlogReq => {
             const newBlogReq = {
                 _id: data._id,
-                url: data.url,
+                url: data.url.replace(/[/]+$/, ""),
                 status: data.status,
                 reason: data.reason,
                 created_at: oldBlogReq.created_at,
@@ -145,7 +145,7 @@ const update = async ({data}) => {
                 return res;
             }
             const blogInfo = {
-                url: data.url,
+                url: data.url.replace(/[/]+$/, ""),
                 feed: {
                     tag: data.feed.tag,
                     url: data.feed.url,
