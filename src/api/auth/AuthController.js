@@ -9,9 +9,7 @@ export default {
     async login(req, res) {
         const [username, password] = [req.body.username, req.body.password];
         if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-            const token = jwtModule.sign({id: ADMIN_USERNAME}, {
-                expiresIn: '30m'
-            });
+            const token = jwtModule.sign({id: ADMIN_USERNAME});
             generateLog({
                 req: req, status: 200
             });
