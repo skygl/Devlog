@@ -1,10 +1,8 @@
 import cheerio from 'cheerio';
 import axios from "axios";
 import {getDate} from "../utils/Utils";
-import logger from "../utils/Logger";
-import moment from "moment";
 
-const crawlNewPosts = async (blog) => {
+const crawlNewPosts = async (blog, createLog) => {
     let promises = [];
 
     const feedHtml = await axios.get(blog.feed.url);
@@ -33,21 +31,26 @@ const crawlNewPosts = async (blog) => {
                         description: descs.description,
                         imageUrl: descs.imageUrl
                     });
-                });
+                })
+                .catch(error => {
+                    createLog({
+                        message: "Error occurs during crawling posts in rss",
+                        url: blog.url,
+                        error: error
+                    });
+                    resolve();
+                })
         }));
     });
 
     return Promise.all(promises)
-        .catch(err => {
-            logger.error(JSON.stringify({
-                type: "CR",
+        .then(posts => posts.filter(post => !!post))
+        .catch(error => {
+            createLog({
                 message: "Error occurs during crawling posts in rss",
-                time: moment().format('YYYY-MM-DD HH:mm:ss'),
                 url: blog.url,
-                error: error.message,
-                stacktrace: error.stack
-            }));
-            throw err;
+                error: error
+            });
         })
 };
 
@@ -110,8 +113,8 @@ class RssCrawler {
     constructor() {
     }
 
-    async crawlNewPosts(blog) {
-        return crawlNewPosts(blog);
+    async crawlNewPosts(blog, createLog) {
+        return crawlNewPosts(blog, createLog);
     }
 }
 

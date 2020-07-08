@@ -5,35 +5,48 @@ import logger from "../../utils/Logger";
 import moment from "moment";
 
 const crawlNewPosts = async () => {
-    logger.info(JSON.stringify({
-        type: "CR",
-        message: "Begin crawling new posts",
-        time: moment().format('YYYY-MM-DD HH:mm:ss'),
-    }));
-    let blogs = await BlogService.getBlogs();
+    createLog({message: "Begin crawling new posts"});
+    BlogService.getBlogs()
+        .then(async (blogs) => {
+            for (const blog of blogs) {
+                const posts = await RssCrawler.crawlNewPosts(blog, createLog)
+                    .catch(error => {
+                        createLog({message: "Error occurs during crawling new posts", url: blog.url, error: error});
+                        return [];
+                    });
+                for (const post of posts) {
+                    PostService.savePost(post)
+                        .catch(error => {
+                            createLog({
+                                message: "Error occurs during saving post",
+                                url: post.url,
+                                error: error
+                            });
+                        });
+                }
+            }
+            createLog({message: "End crawling new posts"});
+        })
+        .catch(error => {
+            createLog({message: "Error occurs during getting blogs", error: error});
+        });
+};
 
-    for (const blog of blogs) {
-        let posts = await RssCrawler.crawlNewPosts(blog);
-        for (const post of posts) {
-            PostService.savePost(post)
-                .catch(error => {
-                    logger.error(JSON.stringify({
-                        type: "CR",
-                        message: "Error occurs during saving posts",
-                        time: moment().format('YYYY-MM-DD HH:mm:ss'),
-                        url: post.url,
-                        error: error.message,
-                        stack: error.stack
-                    }));
-                });
-        }
+const createLog = ({message, error, url}) => {
+    const info = {
+        type: "CR",
+        message: message,
+        time: moment().format('YYYY-MM-DD HH:mm:ss'),
+    };
+    if (!!url) {
+        info.url = url;
     }
-
-    logger.info(JSON.stringify({
-        type: "CR",
-        message: "End crawling new posts",
-        time: moment().format('YYYY-MM-DD HH:mm:ss'),
-    }));
+    if (!!error) {
+        info.error = error.message;
+        logger.error(JSON.stringify(info));
+        return;
+    }
+    logger.info(JSON.stringify(info));
 };
 
 export default {
