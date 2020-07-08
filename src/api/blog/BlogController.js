@@ -1,35 +1,35 @@
-import {DatabaseError} from "../../services/error/error";
 import {DuplicatedBlogUrlExistsError} from "../../services/blog/error/error";
 import BlogService from "../../services/blog/BlogService";
-import logger from "../../utils/Logger";
+import {handleCommonError} from "../commons";
 
 export default {
 
-    async createBlog(req, res) {
+    async createBlog(req, res, next) {
         BlogService.saveBlog(req.body)
             .then((blog) => {
-                res.json({...blog, id: blog._id});
+                req.result = {
+                    status: 200,
+                    json: {...blog, id: blog._id},
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                } else if (error instanceof DuplicatedBlogUrlExistsError) {
-                    return res.status(409).json({message: error.message});
+                if (error instanceof DuplicatedBlogUrlExistsError) {
+                    req.result = {
+                        status: 409,
+                    };
+                    req.error = {
+                        error: "DuplicatedBlogUrlExistsError",
+                        message: 'Duplicated blog URL already exists.'
+                    };
                 } else {
-                    logger.error({
-                        Message: "Unexpected Error Occurred While Creating Blog.",
-                        Details: error.message,
-                        Date: Date().toString(),
-                        Url: req.baseUrl,
-                        Headers: req.headers,
-                        Body: req.body
-                    });
-                    return res.status(500).end();
+                    handleCommonError(req, error);
                 }
+                next();
             })
     },
 
-    async getList(req, res) {
+    async getList(req, res, next) {
         BlogService.getList(
             {
                 _sort: req.query._sort,
@@ -40,87 +40,60 @@ export default {
             })
             .then(result => {
                 res.set('X-Total-Count', result.count);
-                res.json(result.data.map(record => {
-                    record = {...record, id: record._id};
-                    return record;
-                }))
+                req.result = {
+                    status: 200,
+                    json: result.data.map(record => ({...record, id: record._id})),
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Reading Blog.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     },
 
-    async getOne(req, res) {
+    async getOne(req, res, next) {
         BlogService.getOne({id: req.params.id})
             .then(blog => {
-                res.json({...blog, id: blog._id});
+                req.result = {
+                    status: 200,
+                    json: {...blog, id: blog._id},
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Reading Blog.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     },
 
-    async update(req, res) {
+    async update(req, res, next) {
         BlogService.update({data: req.body})
             .then(result => {
-                return {...result}
+                req.result = {
+                    status: 200,
+                    json: {...result}
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Updating Blog.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     },
 
-    async delete(req, res) {
+    async delete(req, res, next) {
         BlogService.delete({id: req.params.id})
             .then(deletedBlog => {
-                res.json(deletedBlog);
+                req.result = {
+                    status: 200,
+                    json: {...deletedBlog}
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Deleting Blog.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     }
 }

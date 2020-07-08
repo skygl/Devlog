@@ -111,7 +111,7 @@ const getOne = async ({id}) => {
         })
 };
 
-const update = async ({data}) => {
+const update = async ({data, session}) => {
     const updatedTime = new Date();
     return BlogReq.findOneAndUpdate({_id: data._id},
         {
@@ -121,7 +121,7 @@ const update = async ({data}) => {
                 reason: data.reason,
                 updated_at: updatedTime,
             }
-        })
+        }, {session: session})
         .then(oldBlogReq => {
             const newBlogReq = {
                 _id: data._id,
@@ -151,7 +151,7 @@ const update = async ({data}) => {
                     url: data.feed.url,
                 },
             };
-            return BlogService.saveBlog(blogInfo)
+            return BlogService.saveBlog(blogInfo, session)
                 .then(() => res);
         })
 };

@@ -1,10 +1,9 @@
 import PostService from "../../services/post/PostService";
-import {DatabaseError} from "../../services/error/error";
-import logger from "../../utils/Logger";
+import {handleCommonError} from "../commons";
 
 export default {
 
-    async getList(req, res) {
+    async getList(req, res, next) {
         PostService.getList({
             sort: req.query._sort,
             start: parseInt(req.query._start),
@@ -18,67 +17,45 @@ export default {
         })
             .then(result => {
                 res.set('X-Total-Count', result.count);
-                res.json(result.data.map(record => {
-                    record = {...record, id: record._id};
-                    return record;
-                }))
+                req.result = {
+                    status: 200,
+                    json: result.data.map(record => ({...record, id: record._id}))
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    console.log(error.error.message)
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Reading Posts.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     },
 
-    async getOne(req, res) {
+    async getOne(req, res, next) {
         PostService.getOne({id: req.params.id})
             .then(post => {
-                res.json({...post, id: post._id})
+                req.result = {
+                    status: 200,
+                    json: {...post, id: post._id},
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Reading Post.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     },
 
-    async update(req, res) {
+    async update(req, res, next) {
         PostService.update({id: req.body.id, score: req.body.score})
             .then(result => {
-                return {...result};
+                req.result = {
+                    status: 200,
+                    json: {...result},
+                };
+                next();
             })
             .catch(error => {
-                if (error instanceof DatabaseError) {
-                    return res.status(500).json({message: error.message, details: error.error});
-                }
-                logger.error(JSON.stringify({
-                    Message: "Unexpected Error Occurred While Updating Post.",
-                    Details: error.message,
-                    Date: Date().toString(),
-                    Url: req.baseUrl,
-                    Headers: req.headers,
-                    Body: req.body
-                }));
-                return res.status(500).end();
+                handleCommonError(req, error);
+                next();
             })
     }
 }

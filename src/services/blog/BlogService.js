@@ -3,8 +3,8 @@ import {DatabaseError} from "../error/error";
 import {DuplicatedBlogUrlExistsError} from "./error/error";
 import '@babel/polyfill';
 
-const saveBlog = async (blogInfo) => {
-    const exists = await existsUrl(blogInfo.url);
+const saveBlog = async (blogInfo, session = null) => {
+    const exists = await existsUrl(blogInfo.url, session);
     if (exists) {
         throw new DuplicatedBlogUrlExistsError();
     }
@@ -16,19 +16,24 @@ const saveBlog = async (blogInfo) => {
     blog.created_at = new Date();
     blog.updated_at = new Date();
 
-    return blog.save()
-        .then(blog => blog.toObject())
+    return blog.save((session ? {session: session} : {}))
+        .then(blog => {
+            return blog.toObject();
+        })
         .catch(err => {
             throw new DatabaseError(err);
         });
 };
 
-const existsUrl = (url) => {
-    return Blog.findOne({url: url.replace(/[/]+$/, "")})
+const existsUrl = (url, session = null) => {
+    return Blog.findOne({url: url.replace(/[/]+$/, "")}, {_id: 1},
+        (session ? {session: session} : {}))
         .catch(err => {
             throw new DatabaseError(err);
         })
-        .then(savedBlog => !!savedBlog);
+        .then(savedBlog => {
+            return !!savedBlog;
+        });
 };
 
 const getBlogs = () => {
