@@ -2,9 +2,14 @@ import BlogService from "../../services/blog/BlogService";
 import PostService from "../../services/post/PostService";
 import RssCrawler from "../../modules/RssCrawler";
 import logger from "../../utils/Logger";
+import moment from "moment";
 
 const crawlNewPosts = async () => {
-    logger.info("[CR] Begin crawling new posts");
+    logger.info(JSON.stringify({
+        type: "CR",
+        message: "Begin crawling new posts",
+        time: moment().format('YYYY-MM-DD HH:mm:ss'),
+    }));
     let blogs = await BlogService.getBlogs();
 
     for (const blog of blogs) {
@@ -13,16 +18,22 @@ const crawlNewPosts = async () => {
             PostService.savePost(post)
                 .catch(error => {
                     logger.error(JSON.stringify({
-                        message: "[CR] Error occurs during crawling elements in post",
+                        type: "CR",
+                        message: "Error occurs during saving posts",
+                        time: moment().format('YYYY-MM-DD HH:mm:ss'),
                         url: post.url,
                         error: error.message,
-                        stacktrace: error.stack
+                        stack: error.stack
                     }));
                 });
         }
     }
 
-    logger.info("[CR] End crawling new posts");
+    logger.info(JSON.stringify({
+        type: "CR",
+        message: "End crawling new posts",
+        time: moment().format('YYYY-MM-DD HH:mm:ss'),
+    }));
 };
 
 export default {
