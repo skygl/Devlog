@@ -133,11 +133,25 @@ const update = async ({id, score}) => {
             }
         })
         .then(async (oldPost) => {
-            const newPost = await Post.findOne({_id: id});
-            return {
-                id: id,
-                previousData: oldPost,
-                data: newPost
+            if (oldPost) {
+                return getOne({id: id})
+                    .then(result => {
+                        if (result.exists) {
+                            return {
+                                exists: true,
+                                id: id,
+                                previousData: oldPost,
+                                data: result.post
+                            }
+                        }
+                        return {
+                            exists: false,
+                        }
+                    })
+            } else {
+                return {
+                    exists: false,
+                }
             }
         })
         .catch(err => {

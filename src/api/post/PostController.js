@@ -56,12 +56,24 @@ export default {
     },
 
     async update(req, res, next) {
-        PostService.update({id: req.body.id, score: req.body.score})
+        PostService.update({id: req.params.id, score: req.body.score})
             .then(result => {
-                req.result = {
-                    status: 200,
-                    json: {...result},
-                };
+                const {exists, json} = result;
+                if (exists) {
+                    req.result = {
+                        status: 200,
+                        json: json
+                    };
+                } else {
+                    req.result = {
+                        status: 404,
+                    };
+                    req.error = {
+                        error: "PostNotFoundError",
+                        message: "Cannot found post with given id in database",
+                        id: req.params.id,
+                    }
+                }
                 next();
             })
             .catch(error => {
