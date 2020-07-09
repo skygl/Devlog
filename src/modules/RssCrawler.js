@@ -1,8 +1,8 @@
 import cheerio from 'cheerio';
 import axios from "axios";
-import {getDate} from "../utils/Utils";
+import moment from "moment";
 
-const crawlNewPosts = async (blog, createLog) => {
+const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
     let promises = [];
 
     const feedHtml = await axios.get(blog.feed.url);
@@ -11,11 +11,11 @@ const crawlNewPosts = async (blog, createLog) => {
 
     $("item").each(function () {
         const published_at = new Date($(this).find("pubDate").text());
-        const yesterday = getDate(new Date(), {day: -1, hours: 0, min: 0, sec: 0, ms: 0});
+        const moment_pubDate = moment(published_at);
 
-        if (yesterday > published_at) {
+        if (moment_pubDate.isBefore(startTime)) {
             return false;
-        } else if ((published_at - yesterday) > 24 * 60 * 60 * 1000) {
+        } else if (moment_pubDate.isSameOrAfter(endTime)) {
             return true;
         }
 
@@ -113,8 +113,8 @@ class RssCrawler {
     constructor() {
     }
 
-    async crawlNewPosts(blog, createLog) {
-        return crawlNewPosts(blog, createLog);
+    async crawlNewPosts(blog, createLog, startTime, endTime) {
+        return crawlNewPosts(blog, createLog, startTime, endTime);
     }
 }
 

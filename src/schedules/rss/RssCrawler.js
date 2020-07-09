@@ -6,10 +6,12 @@ import moment from "moment";
 
 const crawlNewPosts = async () => {
     createLog({message: "Begin crawling new posts"});
+    const endTime = moment().startOf('hour');
+    const startTime = moment(endTime).subtract(3, 'h');
     BlogService.getBlogs()
         .then(async (blogs) => {
             for (const blog of blogs) {
-                const posts = await RssCrawler.crawlNewPosts(blog, createLog)
+                const posts = await RssCrawler.crawlNewPosts(blog, createLog, startTime, endTime)
                     .catch(error => {
                         createLog({message: "Error occurs during crawling new posts", url: blog.url, error: error});
                         return [];
