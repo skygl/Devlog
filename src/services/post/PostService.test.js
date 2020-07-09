@@ -18,7 +18,7 @@ const postInfo = {
 let error = new Error("Database Error Occurs.");
 let databaseError = new DatabaseError(error);
 
-const savedPost = copy(postInfo);
+const savedPost = {...postInfo};
 savedPost._id = "54759eb3c090d83494e2d804";
 
 describe('savePost', () => {
@@ -60,8 +60,11 @@ describe('savePost', () => {
         // When
         let post = await PostService.savePost(postInfo);
 
+        console.log(post);
+        console.log(savedPost);
+
         // Then
-        expect(copy(post)).toMatchObject(savedPost);
+        expect(post).toMatchObject(savedPost);
     });
 });
 
@@ -111,7 +114,7 @@ describe('getList', () => {
         let result = await PostService.getList({start: 0, end: 20, order: 'ASC', sort: 'id'});
 
         // Then
-        expect(copy(result)).toMatchObject({data: [savedPost], count: 1});
+        expect(result).toMatchObject({data: [savedPost], count: 1});
     });
 });
 
@@ -146,7 +149,7 @@ describe('getOne', () => {
         let result = await PostService.getOne({id: savedPost._id});
 
         // Then
-        expect(copy(result)).toMatchObject({exists: true, post: savedPost});
+        expect(result).toMatchObject({exists: true, post: savedPost});
     });
 });
 
@@ -206,7 +209,7 @@ describe('update', () => {
         const result = await PostService.update({id: savedPost._id, score: 8});
 
         // Then
-        expect(copy(result)).toMatchObject({
+        expect(result).toMatchObject({
             exists: true,
             id: savedPost._id,
             previousData: savedPost,

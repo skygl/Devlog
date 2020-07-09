@@ -22,6 +22,10 @@ const savePost = async (postInfo) => {
     post.created_at = new Date();
 
     return post.save()
+        .then(post => {
+            const obj = post.toObject();
+            return {...obj, _id: obj._id.toString()};
+        })
         .catch(error => {
             throw new DatabaseError(error);
         })
@@ -112,7 +116,7 @@ const getOne = async ({id}) => {
             if (post) {
                 return {
                     exists: true,
-                    post: post.toObject()
+                    post: {...post.toObject(), _id: post._id.toString()}
                 }
             } else {
                 return {
@@ -140,7 +144,7 @@ const update = async ({id, score}) => {
                             return {
                                 exists: true,
                                 id: id,
-                                previousData: oldPost,
+                                previousData: {...oldPost.toObject(), _id: oldPost._id.toString()},
                                 data: result.post
                             }
                         }
