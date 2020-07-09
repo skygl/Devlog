@@ -58,7 +58,7 @@ export default {
     async update(req, res, next) {
         PostService.update({id: req.params.id, score: req.body.score})
             .then(result => {
-                const {exists, json} = result;
+                const {exists, ...json} = result;
                 if (exists) {
                     req.result = {
                         status: 200,

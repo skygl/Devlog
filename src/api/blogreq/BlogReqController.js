@@ -58,11 +58,23 @@ export default {
 
     async getOne(req, res, next) {
         BlogReqService.getOne({id: req.params.id})
-            .then(blogReq => {
-                req.result = {
-                    status: 200,
-                    json: {...blogReq, id: blogReq._id},
-                };
+            .then(result => {
+                const {exists, post} = result;
+                if (exists) {
+                    req.result = {
+                        status: 200,
+                        json: {...post, id: post._id},
+                    };
+                } else {
+                    req.result = {
+                        status: 404,
+                    };
+                    req.errror = {
+                        error: "BlogReqNotFoundError",
+                        message: "Cannot found blog request with given id in database",
+                        id: req.params.id,
+                    };
+                }
                 next()
             })
             .catch(error => {

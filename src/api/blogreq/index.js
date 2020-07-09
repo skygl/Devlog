@@ -2,7 +2,6 @@ import express from 'express';
 import {body, param, query} from 'express-validator';
 import BlogReqController from './BlogReqController';
 import {beginTransaction, endTransaction, sendResponse, validate} from "../commons";
-import moment from "moment";
 
 const STATUSES = ["Unhandled", "Denied", "Suspended", "Registered"];
 
@@ -28,7 +27,6 @@ blogreq.get('/:id', [
 ], validate, BlogReqController.getOne, sendResponse);
 
 blogreq.put('/:id', (req, res, next) => {
-    console.log(`${moment().format()} : validation start`);
     next();
 }, [
     param('id').isMongoId().withMessage('must be mongoId'),
