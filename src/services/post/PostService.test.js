@@ -7,56 +7,23 @@ import Post from '../../models/Post';
 
 const postInfo = {
     url: "https://velog.io/@skygl/node-js",
+    title: "Devlog Title",
+    description: "Devlog Description",
+    imageUrl: "https://techcourse.woowahan.com/images/logo/logo_full_dark.png",
     tags: ['nodejs', 'javascript'],
     score: 9,
-    published_at: new Date().toISOString(),
+    published_at: new Date("2020-07-09 11:22:33:444"),
 };
+
+let error = new Error("Database Error Occurs.");
+let databaseError = new DatabaseError(error);
 
 const savedPost = copy(postInfo);
 savedPost._id = "54759eb3c090d83494e2d804";
 
-const tagInfo = {
-    tag: "javascript",
-    page: 5
-};
-
-const savedPostsTop5Yesterday = [
-    postInfo,
-    {
-        _id: "507f1f77bcf86cd799439011",
-        url: "https://velog.io/@skygl/angular-js",
-        tags: ['angularjs', 'javascript'],
-        score: 9,
-        published_at: new Date().toISOString(),
-    },
-    {
-        _id: "507f1f77bcf86cd799439012",
-        url: "https://velog.io/@kygls/springboot",
-        tags: ['springboot', 'java', 'spring'],
-        score: 8,
-        published_at: new Date().toISOString(),
-    },
-    {
-        _id: "507f1f77bcf86cd799439013",
-        url: "https://velog.io/@yglsk/spring-batch",
-        tags: ['spring', 'springbatch', 'java'],
-        score: 8,
-        published_at: new Date().toISOString(),
-    },
-    {
-        _id: "507f1f77bcf86cd799439014",
-        url: "https://velog.io/@glsky/tensorflow",
-        tags: ['tensorflow', 'python', 'machinelearning'],
-        score: 7,
-        published_at: new Date().toISOString(),
-    }
-];
-
 describe('savePost', () => {
     test('Post의 findOne 함수가 에러를 발생시키면 savePost 함수가 에러를 발생시킨다.', async () => {
         // Given
-        let error = new Error("Database Error Occurs.");
-        let databaseError = new DatabaseError(error);
         mockingoose(Post)
             .toReturn(error, 'findOne');
 
@@ -76,8 +43,6 @@ describe('savePost', () => {
 
     test('Post의 save 함수가 에러를 발생시키면 savePost 함수가 에러를 발생시킨다.', async () => {
         // Given
-        let error = new Error("Database Error Occurs.");
-        let databaseError = new DatabaseError(error);
         mockingoose(Post)
             .toReturn(null, 'findOne')
             .toReturn(error, 'save');
@@ -100,27 +65,152 @@ describe('savePost', () => {
     });
 });
 
-describe('findTop5PostsPublishedYesterday', () => {
-    test('Post의 find 함수가 에러를 발생시키면 findTop5PostsPublishedYesterday 함수가 에러를 발생시킨다.', async () => {
+describe('getList', () => {
+    test('Post의 aggregate 함수가 에러를 발생시키면 getList 함수가 에러를 발생시킨다.', async () => {
         // Given
-        let error = new Error("Database Error Occurs.");
-        let databaseError = new DatabaseError(error);
         mockingoose(Post)
-            .toReturn(error, 'find');
+            .toReturn(error, 'aggregate');
 
         // When & Then
-        return expect(PostService.findTop5PostsPublishedYesterday(tagInfo)).rejects.toThrow(databaseError);
+        return expect(PostService.getList({start: 0, end: 20, order: 'ASC', sort: 'id'}))
+            .rejects.toThrow(databaseError);
     });
 
-    test('findTop5PostsPublishedYesterday 함수를 성공한다.', async () => {
+    test('Post의 aggregate 결과에 해당하는 post가 존재하지 않는 경우 getList 함수를 성공한다.', async () => {
         // Given
+        const countError = new Error(`Cannot read property 'count' of undefined`);
         mockingoose(Post)
-            .toReturn(savedPostsTop5Yesterday, 'find');
+            .toReturn(countError, 'aggregate');
 
         // When
-        let posts = await PostService.findTop5PostsPublishedYesterday();
+        let result = await PostService.getList({start: 0, end: 20, order: 'ASC', sort: 'id'});
 
         // Then
-        expect(copy(posts)).toMatchObject(savedPostsTop5Yesterday);
+        expect(copy(result)).toMatchObject({data: [], count: 0});
+    });
+
+
+    test('Post의 aggregate 결과에 해당하는 post가 존재하는 경우 getList 함수를 성공한다.', async () => {
+        // Given
+        const data = [
+            {
+                data: [
+                    savedPost
+                ],
+                count: [
+                    {
+                        count: 1,
+                    }
+                ]
+            }
+        ];
+        mockingoose(Post)
+            .toReturn(data, 'aggregate');
+
+        // When
+        let result = await PostService.getList({start: 0, end: 20, order: 'ASC', sort: 'id'});
+
+        // Then
+        expect(copy(result)).toMatchObject({data: [savedPost], count: 1});
+    });
+});
+
+describe('getOne', () => {
+    test('Post의 findOne 함수가 에러를 발생시키면 getOne 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(error, 'findOne');
+
+        // When & Then
+        return expect(PostService.getOne({id: savedPost._id})).rejects.toThrow(databaseError);
+    });
+
+    test('요청받은 id를 가진 Post가 없는 경우 exists false를 반환한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(null, 'findOne');
+
+        // When
+        let result = await PostService.getOne({id: savedPost._id});
+
+        // Then
+        expect(copy(result)).toMatchObject({exists: false});
+    });
+
+    test('요청받은 id를 가진 Post가 있는 경우 exists true와 해당 post를 반환한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(savedPost, 'findOne');
+
+        // When
+        let result = await PostService.getOne({id: savedPost._id});
+
+        // Then
+        expect(copy(result)).toMatchObject({exists: true, post: savedPost});
+    });
+});
+
+describe('update', () => {
+    test('Post의 findOneAndUpdate 함수가 에러를 발생시키면 update 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(error, "findOneAndUpdate");
+
+        // When & Then
+        return expect(PostService.update({id: savedPost._id, score: 8})).rejects.toThrow(databaseError);
+    });
+
+    test('Post의 findOneAndUpdate 함수에 입력한 id를 가진 post가 없는 경우 update 함수가 성공한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(null, "findOneAndUpdate");
+
+        // When
+        const result = await PostService.update({id: savedPost._id, score: 8});
+
+        // Then
+        expect(copy(result)).toMatchObject({exists: false});
+    });
+
+    test('Post의 findOne 함수가 에러를 발생시키면 update 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn({...savedPost, score: 8}, "findOneAndUpdate")
+            .toReturn(error, "findOne");
+
+        // When & Then
+        return expect(PostService.update({id: savedPost._id, score: 8})).rejects.toThrow(databaseError);
+    });
+
+    test('Post의 findOne 함수에 입력한 id를 가진 post가 없는 경우 update 함수가 성공한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn({...savedPost, score: 8}, "findOneAndUpdate")
+            .toReturn(null, "findOne");
+
+        // When
+        const result = await PostService.update({id: savedPost._id, score: 8});
+
+        // Then
+        expect(copy(result)).toMatchObject({exists: false});
+    });
+
+
+    test('Post의 findOne 함수에 입력한 id를 가진 post가 있는 경우 update 함수가 성공한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(savedPost, "findOneAndUpdate")
+            .toReturn({...savedPost, score: 8}, "findOne");
+
+        // When
+        const result = await PostService.update({id: savedPost._id, score: 8});
+
+        // Then
+        expect(copy(result)).toMatchObject({
+            exists: true,
+            id: savedPost._id,
+            previousData: savedPost,
+            data: {...savedPost, score: 8}
+        });
     });
 });
