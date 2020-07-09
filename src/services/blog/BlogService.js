@@ -18,7 +18,7 @@ const saveBlog = async (blogInfo, session = null) => {
 
     return blog.save((session ? {session: session} : {}))
         .then(blog => {
-            return blog.toObject();
+            return {...blog.toObject(), _id: blog._id.toString()};
         })
         .catch(err => {
             throw new DatabaseError(err);
@@ -28,11 +28,11 @@ const saveBlog = async (blogInfo, session = null) => {
 const existsUrl = (url, session = null) => {
     return Blog.findOne({url: url.replace(/[/]+$/, "")}, {_id: 1},
         (session ? {session: session} : {}))
-        .catch(err => {
-            throw new DatabaseError(err);
-        })
         .then(savedBlog => {
             return !!savedBlog;
+        })
+        .catch(err => {
+            throw new DatabaseError(err);
         });
 };
 
@@ -40,8 +40,8 @@ const getBlogs = () => {
     return Blog.find().lean();
 };
 
-const getList = ({_start, _end, _order, _sort, url}) => {
-    const [skip, limit] = [_start, _end - _start];
+const getList = ({start, end, order, sort, url}) => {
+    const [skip, limit] = [start, end - start];
 
     const pipeline = [];
 
@@ -53,7 +53,7 @@ const getList = ({_start, _end, _order, _sort, url}) => {
     pipeline.push({
         $facet: {
             data: [
-                {"$sort": {[_sort === 'id' ? '_id' : _sort]: _order === 'ASC' ? 1 : -1}},
+                {"$sort": {[sort === 'id' ? '_id' : sort]: order === 'ASC' ? 1 : -1}},
                 {"$skip": skip},
                 {"$limit": limit}
             ],
@@ -71,13 +71,30 @@ const getList = ({_start, _end, _order, _sort, url}) => {
             }
         })
         .catch(err => {
+            if (err.message === `Cannot read property 'count' of undefined`) {
+                return {
+                    data: [],
+                    count: 0
+                }
+            }
             throw new DatabaseError(err);
         })
 };
 
 const getOne = ({id}) => {
     return Blog.findOne({_id: id})
-        .then(blog => blog.toObject())
+        .then(blog => {
+            if (blog) {
+                return {
+                    exists: true,
+                    blog: {...blog.toObject(), _id: blog._id.toString()}
+                }
+            } else {
+                return {
+                    exists: false,
+                }
+            }
+        })
         .catch(err => {
             throw new DatabaseError(err);
         })
@@ -92,14 +109,27 @@ const update = ({data}) => {
                 url: data.url.replace(/[/]+$/, ""),
                 updated_at: new Date()
             }
-        }, {new: true})
-        .then(updatedBlog => {
-            const oldBlog = {...data};
-            delete oldBlog.id;
-            return {
-                id: data._id,
-                previousData: oldBlog,
-                data: updatedBlog
+        })
+        .then(oldBlog => {
+            if (oldBlog) {
+                return getOne({id: data._id})
+                    .then(result => {
+                        if (result.exists) {
+                            return {
+                                exists: true,
+                                id: data._id,
+                                previousData: {...oldBlog.toObject(), _id: oldBlog._id.toString()},
+                                data: result.blog
+                            }
+                        }
+                        return {
+                            exists: false,
+                        }
+                    })
+            } else {
+                return {
+                    exists: false,
+                }
             }
         })
         .catch(err => {
@@ -109,7 +139,14 @@ const update = ({data}) => {
 
 const deleteBlog = ({id}) => {
     return Blog.findOneAndDelete({_id: id})
-        .then(deletedBlog => deletedBlog.toObject())
+        .then(deletedBlog => {
+            if (deletedBlog) {
+                return {...deletedBlog.toObject(), _id: deletedBlog._id.toString(), exists: true};
+            }
+            return {
+                exists: false,
+            }
+        })
         .catch(err => {
             throw new DatabaseError(err);
         });
