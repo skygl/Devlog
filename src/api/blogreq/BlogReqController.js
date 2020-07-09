@@ -74,11 +74,23 @@ export default {
     async update(req, res, next) {
         BlogReqService.update({data: req.body, session: req.session})
             .then(result => {
-                req.result = {
-                    status: 200,
-                    json: {...result}
-                };
-                req.success = true;
+                const {exists, ...json} = result;
+                if (result.exists) {
+                    req.result = {
+                        status: 200,
+                        json: json
+                    };
+                    req.success = true;
+                } else {
+                    req.result = {
+                        status: 404,
+                    };
+                    req.errror = {
+                        error: "BlogReqNotFoundError",
+                        message: "Cannot found blog request with given id in database",
+                        id: req.params.id,
+                    };
+                }
                 next()
             })
             .catch(error => {
@@ -102,10 +114,22 @@ export default {
     async delete(req, res, next) {
         BlogReqService.delete({id: req.params.id})
             .then(deletedBlogReq => {
-                req.result = {
-                    status: 200,
-                    json: deletedBlogReq,
-                };
+                const {exists, ...json} = deletedBlogReq;
+                if (exists) {
+                    req.result = {
+                        status: 200,
+                        json: json,
+                    };
+                } else {
+                    req.result = {
+                        status: 404,
+                    };
+                    req.errror = {
+                        error: "BlogReqNotFoundError",
+                        message: "Cannot found blog request with given id in database",
+                        id: req.params.id,
+                    };
+                }
                 next();
             })
             .catch(error => {

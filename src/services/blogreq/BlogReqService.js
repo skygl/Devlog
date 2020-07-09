@@ -24,7 +24,10 @@ const createBlogReq = async (blogInfo) => {
     blogReq.updated_at = new Date();
 
     return blogReq.save()
-        .then(blogReq => blogReq.toObject())
+        .then(blogReq => {
+            const obj = blogReq.toObject();
+            return {...obj, _id: obj._id.toString()};
+        })
         .catch(err => {
             throw new DatabaseError(err);
         })
@@ -105,7 +108,18 @@ const getList = async ({_start, _end, _order, _sort, url, status}) => {
 
 const getOne = async ({id}) => {
     return BlogReq.findOne({_id: id})
-        .then(blogReq => blogReq.toObject())
+        .then(blogReq => {
+            if (blogReq) {
+                return {
+                    exists: true,
+                    post: {...blogReq.toObject(), _id: blogReq._id.toString()}
+                }
+            } else {
+                return {
+                    exists: false,
+                }
+            }
+        })
         .catch(err => {
             throw new DatabaseError(err);
         })
@@ -123,25 +137,31 @@ const update = async ({data, session}) => {
             }
         }, {session: session})
         .then(oldBlogReq => {
-            const newBlogReq = {
-                _id: data._id,
-                url: data.url.replace(/[/]+$/, ""),
-                status: data.status,
-                reason: data.reason,
-                created_at: oldBlogReq.created_at,
-                updated_at: updatedTime
-            };
+            if (oldBlogReq) {
+                const newBlogReq = {
+                    _id: data._id,
+                    url: data.url.replace(/[/]+$/, ""),
+                    status: data.status,
+                    reason: data.reason,
+                    created_at: oldBlogReq.created_at,
+                    updated_at: updatedTime
+                };
+                return {
+                    exists: true,
+                    id: data._id,
+                    previousData: {...oldBlogReq.toObject(), _id: oldBlogReq._id.toString()},
+                    data: newBlogReq
+                }
+            }
             return {
-                id: data._id,
-                previousData: oldBlogReq,
-                data: newBlogReq
+                exists: false
             }
         })
         .catch(err => {
             throw new DatabaseError(err);
         })
         .then(res => {
-            if (res.data.status !== REGISTERED) {
+            if (!res.exists || res.data.status !== REGISTERED) {
                 return res;
             }
             const blogInfo = {
@@ -158,7 +178,14 @@ const update = async ({data, session}) => {
 
 const deleteBlogReq = ({id}) => {
     return BlogReq.findOneAndDelete({_id: id})
-        .then(deletedBlogReq => deletedBlogReq.toObject())
+        .then(deletedBlogReq => {
+            if (deletedBlogReq) {
+                return {...deletedBlogReq.toObject(), _id: deletedBlogReq._id.toString(), exists: true};
+            }
+            return {
+                exists: false,
+            }
+        })
         .catch(err => {
             throw new DatabaseError(err);
         })
