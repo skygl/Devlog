@@ -31,11 +31,22 @@ export default {
 
     async getOne(req, res, next) {
         PostService.getOne({id: req.params.id})
-            .then(post => {
-                req.result = {
-                    status: 200,
-                    json: {...post, id: post._id},
-                };
+            .then(result => {
+                if (result.exists) {
+                    req.result = {
+                        status: 200,
+                        json: {...result.post, id: result.post._id},
+                    };
+                } else {
+                    req.result = {
+                        status: 404,
+                    };
+                    req.error = {
+                        error: "PostNotFoundError",
+                        message: "Cannot found post with given id in database",
+                        id: req.params.id,
+                    }
+                }
                 next();
             })
             .catch(error => {

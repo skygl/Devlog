@@ -108,7 +108,18 @@ const getList = async ({start, end, order, sort, url, score, start_date, end_dat
 
 const getOne = async ({id}) => {
     return Post.findOne({_id: id})
-        .then(post => post.toObject())
+        .then(post => {
+            if (post) {
+                return {
+                    exists: true,
+                    post: post.toObject()
+                }
+            } else {
+                return {
+                    exists: false,
+                }
+            }
+        })
         .catch(err => {
             throw new DatabaseError(err);
         })
