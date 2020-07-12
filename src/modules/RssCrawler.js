@@ -88,7 +88,8 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
 
 const parseImage = ($) => {
     let element;
-    if ((element = $("meta[property='og:image']")).length > 0) {
+    if ((element = $("meta[property='og:image']")).length > 0
+        || (element = $("meta[name='og:image']")).length > 0) {
         return element.attr("content");
     }
     return "/devlog.png";
@@ -97,6 +98,7 @@ const parseImage = ($) => {
 const parseTitle = ($) => {
     let element;
     if ((element = $("meta[property='og:title']")).length > 0
+        || (element = $("meta[name='og:title']")).length > 0
         || (element = $("meta[name='title']")).length > 0) {
         return element.attr("content");
     } else if ((element = $("head > title")).length > 0) {
@@ -109,6 +111,7 @@ const parseTitle = ($) => {
 const parseDescription = ($) => {
     let element;
     if ((element = $("meta[property='og:description']")).length > 0
+        || (element = $("meta[name='og:description']")).length > 0
         || (element = $("meta[name='description']")).length > 0) {
         return element.attr("content");
     } else if ((element = $("head > description")).length > 0) {
