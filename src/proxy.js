@@ -8,7 +8,10 @@ const proxy = (req, res) => {
             generateLog({
                 req: req, status: response.status
             });
-            res.status(response.status).send(response.data);
+            res.status(200).json({
+                status: response.status,
+                html: response.data,
+            });
         })
         .catch(error => {
             generateLog({
@@ -17,7 +20,7 @@ const proxy = (req, res) => {
                     message: error.message,
                 }
             });
-            res.status(error.response.status).end();
+            res.status(200).json({status: error.response.status});
         })
 };
 
