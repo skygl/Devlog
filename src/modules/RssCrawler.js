@@ -5,43 +5,75 @@ import moment from "moment";
 const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
     let promises = [];
 
+    const handleDesc = (url, tag, published_at, resolve) => {
+        crawlDescs(url, blog.feed.tag)
+            .then(descs => {
+                resolve({
+                    url: url,
+                    published_at: published_at,
+                    tags: descs.tags,
+                    title: descs.title,
+                    description: descs.description,
+                    imageUrl: descs.imageUrl
+                });
+            })
+            .catch(error => {
+                createLog({
+                    message: "Error occurs during crawling posts in rss",
+                    url: blog.url,
+                    error: error
+                });
+                resolve();
+            })
+    };
+
+    const crawlAtom = ($) => {
+        $("entry").each(function () {
+            const published_element = ($(this).find("published")).text() || ($(this).find("updated").text());
+            const moment_pubDate = moment(published_element);
+
+            if (moment_pubDate.isBefore(startTime)) {
+                return false;
+            } else if (moment_pubDate.isSameOrAfter(endTime)) {
+                return true;
+            }
+
+            promises.push(new Promise((resolve) => {
+                const url = $(this).find("link").attr('href');
+                handleDesc(url, blog.feed.tag, published_element, resolve);
+            }));
+        });
+    };
+
+    const crawlRss = ($) => {
+        $("item").each(function () {
+            const published_at = new Date($(this).find("pubDate").text());
+            const moment_pubDate = moment(published_at);
+
+            if (moment_pubDate.isBefore(startTime)) {
+                return false;
+            } else if (moment_pubDate.isSameOrAfter(endTime)) {
+                return true;
+            }
+
+            promises.push(new Promise((resolve) => {
+                const url = $(this).find("link").text();
+                handleDesc(url, blog.feed.tag, published_at, resolve);
+            }));
+        });
+    };
+
     const feedHtml = await axios.get(blog.feed.url);
 
     let $ = cheerio.load(feedHtml.data, {xmlMode: true});
 
-    $("item").each(function () {
-        const published_at = new Date($(this).find("pubDate").text());
-        const moment_pubDate = moment(published_at);
-
-        if (moment_pubDate.isBefore(startTime)) {
-            return false;
-        } else if (moment_pubDate.isSameOrAfter(endTime)) {
-            return true;
-        }
-
-        promises.push(new Promise((resolve) => {
-            const url = $(this).find("link").text();
-            crawlDescs(url, blog.feed.tag)
-                .then(descs => {
-                    resolve({
-                        url: url,
-                        published_at: published_at,
-                        tags: descs.tags,
-                        title: descs.title,
-                        description: descs.description,
-                        imageUrl: descs.imageUrl
-                    });
-                })
-                .catch(error => {
-                    createLog({
-                        message: "Error occurs during crawling posts in rss",
-                        url: blog.url,
-                        error: error
-                    });
-                    resolve();
-                })
-        }));
-    });
+    if ($.root().children().is('feed')) {
+        crawlAtom($);
+    } else if ($.root().children().is('rss')) {
+        crawlRss($);
+    } else {
+        throw new Error("The feed is not handleable, not starting with 'feed' or 'rss'.");
+    }
 
     return Promise.all(promises)
         .then(posts => posts.filter(post => !!post))
