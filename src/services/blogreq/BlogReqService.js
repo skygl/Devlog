@@ -34,7 +34,7 @@ const createBlogReq = async (blogInfo) => {
 };
 
 const existsUrl = async (url) => {
-    let existsBlogUrl = await BlogService.existsUrl(url.replace(/[/]+$/, ""));
+    let existsBlogUrl = await BlogService.existsUrl(url);
     if (existsBlogUrl) {
         return {
             exists: true,
@@ -43,7 +43,11 @@ const existsUrl = async (url) => {
         };
     }
 
-    let existsBlogReqUrl = await BlogReq.findOne({url: url.replace(/[/]+$/, ""), status: {$ne: DENIED}})
+    const domainName = url.replace(/[/]+$/, "").replace(/^http(s)?:\/\//, "");
+    const regex = new RegExp("^http(s)?://" + domainName + "$");
+    let existsBlogReqUrl = await BlogReq.findOne({
+        url: regex, status: {$ne: DENIED}
+    })
         .catch(error => {
             throw new DatabaseError(error);
         })

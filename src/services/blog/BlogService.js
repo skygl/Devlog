@@ -26,7 +26,9 @@ const saveBlog = async (blogInfo, session = null) => {
 };
 
 const existsUrl = (url, session = null) => {
-    return Blog.findOne({url: url.replace(/[/]+$/, "")}, {_id: 1},
+    const domainName = url.replace(/[/]+$/, "").replace(/^http(s)?:\/\//, "");
+    const regex = new RegExp("^http(s)?://" + domainName + "$");
+    return Blog.findOne({url: regex}, {_id: 1},
         (session ? {session: session} : {}))
         .then(savedBlog => {
             return !!savedBlog;
