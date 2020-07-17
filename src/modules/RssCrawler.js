@@ -5,15 +5,17 @@ import moment from "moment";
 const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
     let promises = [];
 
-    const handleDesc = (url, tag, published_at, resolve) => {
+    const handleDesc = ({url, published, resolve, title, description}) => {
         crawlDescs(url, blog.feed.tag)
             .then(descs => {
                 resolve({
                     url: url,
-                    published_at: published_at,
+                    published_at: published,
                     tags: descs.tags,
-                    title: descs.title,
-                    description: descs.description,
+                    title: title ? title : descs.title,
+                    description: description
+                        ? (descs.description.length < 30 && description.length > descs.description.length ? description : descs.description)
+                        : descs.description,
                     imageUrl: descs.imageUrl
                 });
             })
@@ -40,7 +42,13 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
 
             promises.push(new Promise((resolve) => {
                 const url = $(this).find("link").attr('href');
-                handleDesc(url, blog.feed.tag, published_element, resolve);
+                handleDesc({
+                    url: url,
+                    published: published_element,
+                    resolve: resolve,
+                    title: parseTitleFromFeed($(this)),
+                    description: parseDescriptionFromFeed($(this))
+                });
             }));
         });
     };
@@ -58,7 +66,13 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
 
             promises.push(new Promise((resolve) => {
                 const url = $(this).find("link").text();
-                handleDesc(url, blog.feed.tag, published_at, resolve);
+                handleDesc({
+                    url: url,
+                    published: published_at,
+                    resolve: resolve,
+                    title: parseTitleFromFeed($(this)),
+                    description: parseDescriptionFromFeed($(this))
+                });
             }));
         });
     };
@@ -84,6 +98,23 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
                 error: error
             });
         })
+};
+
+const parseTitleFromFeed = (post) => {
+    let element;
+    if ((element = post.find("title")).length > 0) {
+        return element.text();
+    }
+    return null;
+};
+
+const parseDescriptionFromFeed = (post) => {
+    let element;
+    if ((element = post.find("description")).length > 0
+        || (element = post.find("content")).length > 0) {
+        return element.text();
+    }
+    return null;
 };
 
 const parseImage = ($) => {
