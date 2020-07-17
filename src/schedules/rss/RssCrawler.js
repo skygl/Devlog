@@ -17,7 +17,11 @@ const crawlNewPosts = async () => {
                         return [];
                     });
                 for (const post of posts) {
-                    PostService.savePost(post)
+                    PostService.savePost({
+                        ...post,
+                        title: replaceHTMLCode(post.title),
+                        description: replaceHTMLCode(post.description).slice(0, 250)
+                    })
                         .catch(error => {
                             createLog({
                                 message: "Error occurs during saving post",
@@ -49,6 +53,27 @@ const createLog = ({message, error, url}) => {
         return;
     }
     logger.info(JSON.stringify(info));
+};
+
+const replaceHTMLCode = (string) => {
+    return string.replace(/&(lt|gt|quot|nbsp|amp|apos);/g, function (m, t) {
+        switch (t) {
+            case 'lt':
+                return '<';
+            case 'gt':
+                return '>';
+            case 'quot':
+                return '"';
+            case 'nbsp':
+                return '';
+            case 'amp':
+                return '&';
+            case 'apos':
+                return "'";
+            default:
+                return "";
+        }
+    }).replace(/(\n|&nbsp;|<([^>]+)>)/ig, "");
 };
 
 export default {
