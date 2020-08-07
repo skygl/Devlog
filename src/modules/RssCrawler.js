@@ -29,46 +29,35 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
             })
     };
 
-    const crawlAtom = ($) => {
-        $("entry").each(function () {
-            const published_element = ($(this).find("published")).text() || ($(this).find("updated").text());
+    const crawlFeed = (item, $) => {
+        $(item).each(function () {
+            let published_element;
+            if (item === 'entry') {
+                published_element = ($(this).find("published")).text() || ($(this).find("updated").text());
+            } else if (item === 'item') {
+                published_element = $(this).find("pubDate").text();
+            }
             const moment_pubDate = moment(published_element);
+            const startOfDay = moment(startTime).startOf('day');
 
-            if (moment_pubDate.isBefore(startTime)) {
+            if (startTime.hour() < 21 && moment_pubDate.isBefore(startTime)) {
+                return false;
+            } else if (moment_pubDate.isBefore(startOfDay) || (moment_pubDate.isBefore(startTime) && !isOnTheDot(moment_pubDate))) {
                 return false;
             } else if (moment_pubDate.isSameOrAfter(endTime)) {
                 return true;
             }
 
             promises.push(new Promise((resolve) => {
-                const url = $(this).find("link").attr('href');
+                let url;
+                if (item === 'entry') {
+                    url = $(this).find("link").attr('href');
+                } else if (item === 'item') {
+                    url = $(this).find("link").text();
+                }
                 handleDesc({
                     url: url,
                     published: published_element,
-                    resolve: resolve,
-                    title: parseTitleFromFeed($(this)),
-                    description: parseDescriptionFromFeed($(this))
-                });
-            }));
-        });
-    };
-
-    const crawlRss = ($) => {
-        $("item").each(function () {
-            const published_at = new Date($(this).find("pubDate").text());
-            const moment_pubDate = moment(published_at);
-
-            if (moment_pubDate.isBefore(startTime)) {
-                return false;
-            } else if (moment_pubDate.isSameOrAfter(endTime)) {
-                return true;
-            }
-
-            promises.push(new Promise((resolve) => {
-                const url = $(this).find("link").text();
-                handleDesc({
-                    url: url,
-                    published: published_at,
                     resolve: resolve,
                     title: parseTitleFromFeed($(this)),
                     description: parseDescriptionFromFeed($(this))
@@ -82,9 +71,9 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
     let $ = cheerio.load(feedHtml.data, {xmlMode: true});
 
     if ($.root().children().is('feed')) {
-        crawlAtom($);
+        crawlFeed('entry', $);
     } else if ($.root().children().is('rss')) {
-        crawlRss($);
+        crawlFeed('item', $);
     } else {
         throw new Error("The feed is not handleable, not starting with 'feed' or 'rss'.");
     }
@@ -173,6 +162,10 @@ const crawlDescs = async (url, tagSelector) => {
         imageUrl,
         description
     };
+};
+
+const isOnTheDot = (date) => {
+    return date.minute() === 0 && date.second() === 0 && date.millisecond() === 0;
 };
 
 class RssCrawler {
