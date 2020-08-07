@@ -80,5 +80,32 @@ export default {
                 handleCommonError(req, error);
                 next();
             })
+    },
+
+    async delete(req, res, next) {
+        PostService.delete({id: req.params.id})
+            .then(deletedPost => {
+                const {exists, ...json} = deletedPost;
+                if (exists) {
+                    req.result = {
+                        status: 200,
+                        json: json,
+                    };
+                } else {
+                    req.result = {
+                        status: 404,
+                    };
+                    req.errror = {
+                        error: "PostNotFoundError",
+                        message: "Cannot found post with given id in database",
+                        id: req.params.id,
+                    };
+                }
+                next();
+            })
+            .catch(error => {
+                handleCommonError(req, error);
+                next();
+            })
     }
 }

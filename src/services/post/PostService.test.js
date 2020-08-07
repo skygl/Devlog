@@ -217,3 +217,38 @@ describe('update', () => {
         });
     });
 });
+
+describe('deletePost', () => {
+    test('Post의 findOneAndDelete 함수가 에러를 발생시키면 deletePost 함수가 에러를 발생시킨다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(error, "findOneAndDelete");
+
+        // When & Then
+        return expect(PostService.delete({id: savedPost._id})).rejects.toThrow(databaseError);
+    });
+
+    test('요청받은 id를 가진 Post가 없는 경우 exists false를 반환한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(null, 'findOneAndDelete');
+
+        // When
+        let result = await PostService.delete({id: savedPost._id});
+
+        // Then
+        expect(result).toMatchObject({exists: false});
+    });
+
+    test('요청받은 id를 가진 Post가 있는 경우 exists true와 삭제된 Post를 반환한다.', async () => {
+        // Given
+        mockingoose(Post)
+            .toReturn(savedPost, 'findOneAndDelete');
+
+        // When
+        let result = await PostService.delete({id: savedPost._id});
+
+        // Then
+        expect(result).toMatchObject({exists: true, ...savedPost});
+    });
+});

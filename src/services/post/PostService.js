@@ -163,10 +163,26 @@ const update = async ({id, score}) => {
         })
 };
 
+const deletePost = async ({id}) => {
+    return Post.findOneAndDelete({_id: id})
+        .then(deletedPost => {
+            if (deletedPost) {
+                return {...deletedPost.toObject(), _id: deletedPost._id.toString(), exists: true};
+            }
+            return {
+                exists: false,
+            }
+        })
+        .catch(err => {
+            throw new DatabaseError(err);
+        })
+};
+
 export default {
     savePost: savePost,
     findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
     getList: getList,
     getOne: getOne,
     update: update,
+    delete: deletePost,
 }

@@ -38,4 +38,8 @@ post.put('/:id', [
     body('score').isInt({min: 1, max: 10}).withMessage('must be between 1 and 10'),
 ], validate, PostController.update, sendResponse);
 
+post.delete('/:id', [
+    param('id').isMongoId().withMessage('must be mongoId'),
+], validate, PostController.delete, sendResponse);
+
 export default post;
