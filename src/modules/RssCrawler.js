@@ -40,11 +40,11 @@ const crawlNewPosts = async (blog, createLog, startTime, endTime) => {
             const moment_pubDate = moment(published_element);
             const startOfDay = moment(startTime).startOf('day');
 
-            if (startTime.hour() < 21 && moment_pubDate.isBefore(startTime)) {
+            if (moment_pubDate.isSameOrAfter(endTime)) {
+                return true;
+            } else if (moment_pubDate.isBefore(startTime.hour() < 21 ? startTime : startOfDay)) {
                 return false;
-            } else if (moment_pubDate.isBefore(startOfDay) || (moment_pubDate.isBefore(startTime) && !isOnTheDot(moment_pubDate))) {
-                return false;
-            } else if (moment_pubDate.isSameOrAfter(endTime)) {
+            } else if (startTime.hour() === 21 && !isOnTheDot(moment_pubDate) && moment_pubDate.isBefore(startTime)) {
                 return true;
             }
 
