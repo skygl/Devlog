@@ -6,6 +6,7 @@ const PostSchema = new mongoose.Schema({
     title: String,
     description: String,
     imageUrl: String,
+    blog: {type: mongoose.Schema.ObjectId, ref: 'Blog'},
     score: Number,
     published_at: Date,
     created_at: Date
