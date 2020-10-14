@@ -20,6 +20,7 @@ const savePost = async (postInfo) => {
     post.score = postInfo.score;
     post.published_at = postInfo.published_at;
     post.created_at = new Date();
+    post.blog = postInfo.blog;
 
     return post.save()
         .then(post => {

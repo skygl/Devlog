@@ -20,7 +20,8 @@ const crawlNewPosts = async () => {
                     PostService.savePost({
                         ...post,
                         title: replaceHTMLCode(post.title),
-                        description: replaceHTMLCode(post.description).slice(0, 250)
+                        description: replaceHTMLCode(post.description).slice(0, 250),
+                        blog: blog._id
                     })
                         .catch(error => {
                             createLog({
