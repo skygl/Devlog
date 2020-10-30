@@ -16,7 +16,7 @@ const savePost = async (postInfo) => {
     post.url = postInfo.url;
     post.title = postInfo.title;
     post.description = postInfo.description;
-    post.imageUrl = postInfo.imageUrl && postInfo.imageUrl.trim() !== '' ? await uploadImage(postInfo.imageUrl) : '';
+    post.imageUrl = postInfo.imageUrl && postInfo.imageUrl.trim() !== '' && postInfo.imageUrl !== '/devlog.png' ? await uploadImage(postInfo.imageUrl) : postInfo.imageUrl;
     post.tags = postInfo.tags;
     post.score = postInfo.score;
     post.published_at = postInfo.published_at;
