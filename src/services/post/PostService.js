@@ -3,6 +3,7 @@ import {getDate} from '../../utils/Utils';
 import '@babel/polyfill';
 import rangeParser from "parse-numeric-range";
 import {DatabaseError, DuplicatedPostUrlExistsError} from "../error/error";
+import {uploadImage} from "../external/S3UploadService";
 
 const savePost = async (postInfo) => {
     let existsUrl = await existsPostUrl(postInfo.url);
@@ -15,7 +16,7 @@ const savePost = async (postInfo) => {
     post.url = postInfo.url;
     post.title = postInfo.title;
     post.description = postInfo.description;
-    post.imageUrl = postInfo.imageUrl;
+    post.imageUrl = postInfo.imageUrl && postInfo.imageUrl.trim() !== '' ? await uploadImage(postInfo.imageUrl) : '';
     post.tags = postInfo.tags;
     post.score = postInfo.score;
     post.published_at = postInfo.published_at;
