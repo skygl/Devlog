@@ -38,7 +38,7 @@ const postRecommendsToSlackChannel = async (posts) => {
             return blocks;
         })
         .then(blocks => {
-            return SlackClient.postRecommendsToSlackChannel(blocks);
+            return SlackClient.postMessage(blocks);
         })
         .catch(error => {
             logger.error({
