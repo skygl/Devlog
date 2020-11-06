@@ -1,5 +1,6 @@
 import BlogService from "../../services/blog/BlogService";
 import PostService from "../../services/post/PostService";
+import {postErrorMessage} from "../../services/external/SlackService";
 import RssCrawler from "../../modules/RssCrawler";
 import logger from "../../utils/Logger";
 import moment from "moment";
@@ -51,7 +52,7 @@ const createLog = ({message, error, url}) => {
     if (!!error) {
         info.error = error.message;
         logger.error(JSON.stringify(info));
-        return;
+        return postErrorMessage(info);
     }
     logger.info(JSON.stringify(info));
 };
