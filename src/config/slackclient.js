@@ -10,7 +10,7 @@ class SlackClient {
         this.client = new WebClient(SLACK_TOKEN);
     }
 
-    postRecommendsToSlackChannel(blocks) {
+    postMessage(blocks) {
         return this.client.chat.postMessage({
             blocks: blocks,
             channel: SLACK_CHANNEL_ID

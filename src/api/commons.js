@@ -2,6 +2,7 @@ import {validationResult} from "express-validator";
 import mongoose from "mongoose";
 import {DatabaseError} from "../services/error/error";
 import logger from "../utils/Logger";
+import {postErrorMessage} from "../services/external/SlackService";
 import moment from "moment";
 
 export const validate = (req, res, next) => {
@@ -103,7 +104,7 @@ export const generateLog = ({req, status, error}) => {
     if (error) {
         info.error = error;
         logger.error(JSON.stringify(info));
-        return;
+        return postErrorMessage(info);
     }
     logger.info(JSON.stringify(info));
 };
