@@ -107,7 +107,7 @@ export default {
     },
 
     async delete(req, res, next) {
-        BlogService.delete({id: req.params.id})
+        BlogService.delete({id: req.params.id, session: req.session})
             .then(result => {
                 const {exists, ...json} = result;
                 if (exists) {
@@ -115,6 +115,7 @@ export default {
                         status: 200,
                         json: json
                     };
+                    req.success = true;
                 } else {
                     req.result = {
                         status: 404,
@@ -124,10 +125,12 @@ export default {
                         message: "Cannot found blog with given id in database",
                         id: req.params.id,
                     };
+                    req.success = false;
                 }
                 next();
             })
             .catch(error => {
+                req.success = false;
                 handleCommonError(req, error);
                 next();
             })

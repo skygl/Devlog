@@ -1,7 +1,7 @@
 import express from 'express';
 import {body, param, query} from 'express-validator';
 import BlogController from './BlogController';
-import {sendResponse, validate} from "../commons";
+import {beginTransaction, endTransaction, sendResponse, validate} from "../commons";
 
 const blog = express.Router();
 
@@ -29,6 +29,6 @@ blog.put('/:id', [
 
 blog.delete('/:id', [
     param('id').isMongoId().withMessage('must be mongoId'),
-], validate, BlogController.delete, sendResponse);
+], validate, beginTransaction, BlogController.delete, endTransaction, sendResponse);
 
 export default blog;

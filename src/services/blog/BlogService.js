@@ -2,6 +2,7 @@ import Blog from '../../models/Blog';
 import {DatabaseError} from "../error/error";
 import {DuplicatedBlogUrlExistsError} from "./error/error";
 import '@babel/polyfill';
+import PostService from "../post/PostService";
 
 const saveBlog = async (blogInfo, session = null) => {
     const exists = await existsUrl(blogInfo.url, session);
@@ -139,8 +140,10 @@ const update = ({data}) => {
         })
 };
 
-const deleteBlog = ({id}) => {
-    return Blog.findOneAndDelete({_id: id})
+const deleteBlog = async ({id, session}) => {
+    await PostService.deleteByBlogId({id, session});
+
+    return Blog.findOneAndDelete({_id: id}, {session})
         .then(deletedBlog => {
             if (deletedBlog) {
                 return {...deletedBlog.toObject(), _id: deletedBlog._id.toString(), exists: true};

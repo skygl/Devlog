@@ -180,6 +180,10 @@ const deletePost = async ({id}) => {
         })
 };
 
+const deleteByBlogId = async ({id, session}) => {
+    return Post.deleteMany({blog: id}, {session});
+};
+
 export default {
     savePost: savePost,
     findTop5PostsPublishedYesterday: findTop5PostsPublishedYesterday,
@@ -187,4 +191,5 @@ export default {
     getOne: getOne,
     update: update,
     delete: deletePost,
+    deleteByBlogId: deleteByBlogId,
 }
