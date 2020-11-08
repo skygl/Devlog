@@ -7,7 +7,9 @@ import {uploadImage} from "../external/S3UploadService";
 
 const savePost = async (postInfo) => {
     const getImageUrl = async (imageUrl) => {
-        if (!imageUrl || imageUrl.trim() === '' || imageUrl === '/devlog.png') {
+        const regex = new RegExp("^http(s)?:\/\/", "i");
+
+        if (!imageUrl || imageUrl.trim() === '' || !regex.test(imageUrl.trim())) {
             return '/devlog.png';
         }
         try {
@@ -27,7 +29,7 @@ const savePost = async (postInfo) => {
     post.url = postInfo.url;
     post.title = postInfo.title;
     post.description = postInfo.description;
-    post.imageUrl = getImageUrl(postInfo.imageUrl);
+    post.imageUrl = await getImageUrl(postInfo.imageUrl);
     post.tags = postInfo.tags;
     post.score = postInfo.score;
     post.published_at = postInfo.published_at;
