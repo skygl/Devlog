@@ -33,7 +33,7 @@ export default class Server {
         app.use('/posts', post);
         app.use('/', auth);
         app.use('/api', api);
-        app.use('/test', async (req, res) => {
+        app.get('/test', async (req, res) => {
             return res.status(200).json(req.query);
         });
     }
