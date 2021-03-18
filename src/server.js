@@ -33,6 +33,9 @@ export default class Server {
         app.use('/posts', post);
         app.use('/', auth);
         app.use('/api', api);
+        app.use('/test', async (req: Request, res: Response) => {
+            return res.status(200).json(req.query);
+        });
     }
 
     listen(port) {
